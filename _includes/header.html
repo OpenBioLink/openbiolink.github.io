@@ -1,0 +1,31 @@
+<header class="header">
+	
+	<!-- particles.js container -->
+	<div id="particles-js" class="particles"></div>
+
+	<!-- scripts -->
+	<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+	<script>
+	  particlesJS.load('particles-js', '/assets/particles.json', function() {
+		console.log('particles.js loaded - callback');
+	  });
+	</script>
+    <section class="logo">
+        <a href="{{ site.url }}/" class="logo__link">
+            {% if site.logo_img != nil %}
+                <h1 style="display: none;">{{ site.title }}</h1>
+                <img class="logo__link__img" src="{{site.logo_img}}" />
+            {% else %}
+                <h1>{{ site.title }}</h1>
+            {% endif %}
+        </a>
+    </section>
+    <button id="menuToggle">
+        <div></div>
+        <div></div>
+        <div></div>
+    </button>
+    <nav class="menu">
+        {% include nav.html nav=site.data.nav %}
+    </nav>
+</header>

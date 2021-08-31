@@ -1,0 +1,36 @@
+// =============================
+// global.scss
+// =============================
+// Used for single page styles.
+
+.page{
+	width: 100%;
+	background: inherit;
+    color: var(--c-pageText);
+    justify-self: center;
+    margin: 0 2rem;
+    max-width: 1000px;
+    @include flexbox{
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    img{
+        max-width: 100%;
+    }
+
+    
+    h1{
+        margin-right:auto;
+        margin-bottom: 0px;
+    }
+    h2{
+        margin-right:auto;
+        margin-bottom: 0px;
+    }
+    h3{
+        margin-right:auto;
+        margin-bottom: 0px;
+    }
+}

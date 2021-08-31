@@ -1,0 +1,15 @@
+- title: Challenge
+  url: 
+  icon: assets/img/icons/goal.svg
+- title: Dataset
+  url: dataset
+  icon: assets/img/icons/biomedicine.svg
+- title: Participation
+  url: participation/
+  icon: assets/img/icons/rocket.svg
+- title: Rules
+  url: rules/
+  icon: assets/img/icons/guideline.svg
+- title: Team
+  url: team/
+  icon: assets/img/icons/team.svg
