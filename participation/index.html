@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css"/>
+<link rel="stylesheet" href="/assets/style.css"/>
+<link rel="stylesheet" href="/assets/js/lity.min.css"/>
+
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta property="og:site_name" content="OpenBioLink2021 Challenge" />
+<meta 
+    property="og:title"
+    content="
+        
+            Participation
+        
+    " 
+/>
+
+<meta property="og:url" content="//participation/" />
+
+    <meta property="og:type" content="article" />
+
+
+
+    <meta property="fb:app_id" content="" />
+
+
+
+<title>
+    
+        Participation
+    
+</title>
+</head>
+<body class="index">
+
+    <header class="header">
+	
+	<!-- particles.js container -->
+	<div id="particles-js" class="particles"></div>
+
+	<!-- scripts -->
+	<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+	<script>
+	  particlesJS.load('particles-js', '/assets/particles.json', function() {
+		console.log('particles.js loaded - callback');
+	  });
+	</script>
+    <section class="logo">
+        <a href="/" class="logo__link">
+            
+                <h1 style="display: none;">OpenBioLink2021 Challenge</h1>
+                <img class="logo__link__img" src="/assets/img/logo2021-transp.png" />
+            
+        </a>
+    </section>
+    <button id="menuToggle">
+        <div></div>
+        <div></div>
+        <div></div>
+    </button>
+    <nav class="menu">
+        
+<ul class="list primary">
+
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/">
+                
+                    <img src="/assets/img/icons/goal.svg"/>
+                
+                
+                    <p>Challenge</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/dataset">
+                
+                    <img src="/assets/img/icons/biomedicine.svg"/>
+                
+                
+                    <p>Dataset</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/participation/">
+                
+                    <img src="/assets/img/icons/rocket.svg"/>
+                
+                
+                    <p>Participation</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/rules/">
+                
+                    <img src="/assets/img/icons/guideline.svg"/>
+                
+                
+                    <p>Rules</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/team/">
+                
+                    <img src="/assets/img/icons/team.svg"/>
+                
+                
+                    <p>Team</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+</ul>
+    </nav>
+</header>
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+<main class="page">
+    <h1 id="participation">Participation</h1>
+
+<ol>
+  <li>Register your Team: TBD Link to registration form</li>
+  <li>Make your submission: TBD Link to submission form</li>
+</ol>
+
+<h2 id="evaluation">Evaluation</h2>
+
+<p>To evaluate a trained model on a OpenBioLink dataset a subclass of <code class="language-plaintext highlighter-rouge">openbiolink.evaluation.evaluation.Evaluator</code> has to be created that implements the function <code class="language-plaintext highlighter-rouge">score_batch()</code> function. A reference to this class can be found <a href="../obl2021.html#obl2021.OBL2021Evaluator">here</a>.</p>
+
+<h3 id="implementing-__init__">Implementing <code class="language-plaintext highlighter-rouge">__init__</code></h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">Evaluator</code> class uses an instantiation of <code class="language-plaintext highlighter-rouge">openbiolink.evaluation.dataLoader.DataLoader</code>, which is used to download the specified version of the OpenBioLink dataset, see also (here)[””].</p>
+
+<h3 id="implementing-score_batch">Implementing <code class="language-plaintext highlighter-rouge">score_batch()</code></h3>
+
+<p>The function <code class="language-plaintext highlighter-rouge">score_batch</code> is used to retrieve the scores of a set of test triples. It gets called with a tensor of batch test triples (shape <code class="language-plaintext highlighter-rouge">(batch_size, 3)</code>) and should return a tuple <code class="language-plaintext highlighter-rouge">(score_head, score_tail)</code>, two tensors of shape <code class="language-plaintext highlighter-rouge">(batch_size, num_entities)</code>. OpenBioLink is evaluated by corrupting the head/tail of a triple with all possible entities in the dataset. Consider \(\mathcal{K} = (\mathcal{E},\mathcal{R},\mathcal{T})\) where \(\mathcal{E}\) is the set of unique entities, \(\mathcal{R}\) is the set of unique relations, and \(\mathcal{T}\) are the triples in the dataset. Then the corrupted tail triples for a positive triple \((h, r, t)\) are \((h, r, e)\) for \(e \in \mathcal{E}\) and the corrupted head triples are \((e, r, t)\) for \(e \in \mathcal{E}\). The value of <code class="language-plaintext highlighter-rouge">score_head[i,j]</code> is then the score of <code class="language-plaintext highlighter-rouge">(j, batch[i,1], batch[i,2])</code>, while the value of <code class="language-plaintext highlighter-rouge">score_tail[i,j]</code> is the score of the triple <code class="language-plaintext highlighter-rouge">(batch[i,0], batch[i,1], j)</code>.</p>
+
+<h3 id="calling-function-evaluate">Calling function <code class="language-plaintext highlighter-rouge">evaluate()</code></h3>
+
+<p>After the creation of a custom class that implements <code class="language-plaintext highlighter-rouge">Evaluator</code>, your approach can be evaluated by calling <code class="language-plaintext highlighter-rouge">evaluate(batch_size)</code> with the desired size of the batch that gets passed to <code class="language-plaintext highlighter-rouge">score_batch()</code>.</p>
+
+<h3 id="example">Example</h3>
+
+<p>The following is a sketch of how to use the evaluator to create a submission file. Concrete examples of evaluating an embedding model trained with <a href="&quot;&quot;">dgl-ke</a> can be seen <a href="&quot;&quot;">here</a> and an example of evaluating the symbolic rule-based approach <a href="&quot;&quot;">AnyBURL/SAFRAN</a> can be seen <a href="&quot;&quot;">here</a>.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">"""
+Import of the OpenBioLink Dataset and Evaluator.
+"""</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">openbiolink.obl2021</span> <span class="kn">import</span> <span class="n">OBL2021Dataset</span><span class="p">,</span> <span class="n">OBL2021Evaluator</span>
+
+<span class="s">"""
+Implementation of the score_batch function of the OBL2021 class
+"""</span>
+<span class="k">class</span> <span class="nc">MyEval</span><span class="p">(</span><span class="n">OBL2021Evaluator</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">dl</span> <span class="o">=</span> <span class="n">OBL2021Dataset</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">().</span><span class="n">__init__</span><span class="p">(</span><span class="n">dl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="k">def</span> <span class="nf">score_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="c1"># of shape (batch.size()[0], self.dl.num_entities)
+</span>        <span class="n">head_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">score_heads</span><span class="p">(</span><span class="n">batch</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">batch</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> 
+        <span class="c1"># of shape (batch.size()[0], self.dl.num_entities)
+</span>        <span class="n">tail_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">score_tails</span><span class="p">(</span><span class="n">batch</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">batch</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> 
+        <span class="k">return</span> <span class="n">head_scores</span><span class="p">,</span> <span class="n">tail_scores</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">ev</span> <span class="o">=</span> <span class="n">MyEval</span><span class="p">()</span>
+    <span class="n">ev</span><span class="p">.</span><span class="n">evaluate</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+	</code></pre></figure>
+
+
+</main>
+
+    
+    <footer class="footer">
+        <section class="footer__about">
+                <p class="footer__about__copyright">© Simon Ott 2021, <a href="/attributions.html">Icon attributions</a></p>
+                
+                <span class="divider">·</span>
+                
+                <span class="footer__about__theme"><p>theme</p><a id="simplex-logo" href="https://github.com/andreondra/jekyll-theme-simplex" target="_blank"><img alt="Simplex theme logo" src="/assets/img/icons/simplex_logo.svg"/></a><p>by <a href="https://ondrej.golasowski.com/">golas</a></p></span>
+        </section>
+</footer>
+    
+    <script src="/assets/js/jquery.slim.min.js"></script>
+<script src="/assets/js/lity.min.js"></script>
+<script src="/assets/js/tools.js"></script>
+</body>
+</html>

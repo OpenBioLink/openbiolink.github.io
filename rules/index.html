@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css"/>
+<link rel="stylesheet" href="/assets/style.css"/>
+<link rel="stylesheet" href="/assets/js/lity.min.css"/>
+
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta property="og:site_name" content="OpenBioLink2021 Challenge" />
+<meta 
+    property="og:title"
+    content="
+        
+            Rules
+        
+    " 
+/>
+
+<meta property="og:url" content="//rules/" />
+
+    <meta property="og:type" content="article" />
+
+
+
+    <meta property="fb:app_id" content="" />
+
+
+
+<title>
+    
+        Rules
+    
+</title>
+</head>
+<body class="index">
+
+    <header class="header">
+	
+	<!-- particles.js container -->
+	<div id="particles-js" class="particles"></div>
+
+	<!-- scripts -->
+	<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+	<script>
+	  particlesJS.load('particles-js', '/assets/particles.json', function() {
+		console.log('particles.js loaded - callback');
+	  });
+	</script>
+    <section class="logo">
+        <a href="/" class="logo__link">
+            
+                <h1 style="display: none;">OpenBioLink2021 Challenge</h1>
+                <img class="logo__link__img" src="/assets/img/logo2021-transp.png" />
+            
+        </a>
+    </section>
+    <button id="menuToggle">
+        <div></div>
+        <div></div>
+        <div></div>
+    </button>
+    <nav class="menu">
+        
+<ul class="list primary">
+
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/">
+                
+                    <img src="/assets/img/icons/goal.svg"/>
+                
+                
+                    <p>Challenge</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/dataset">
+                
+                    <img src="/assets/img/icons/biomedicine.svg"/>
+                
+                
+                    <p>Dataset</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/participation/">
+                
+                    <img src="/assets/img/icons/rocket.svg"/>
+                
+                
+                    <p>Participation</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/rules/">
+                
+                    <img src="/assets/img/icons/guideline.svg"/>
+                
+                
+                    <p>Rules</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+        <li class="item">
+
+            <div class="item-controls">
+                <a href="/team/">
+                
+                    <img src="/assets/img/icons/team.svg"/>
+                
+                
+                    <p>Team</p>
+                
+                </a>
+
+            
+            </div>
+            
+        </li>   
+    
+</ul>
+    </nav>
+</header>
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+<main class="page">
+    <h1 id="rules">Rules</h1>
+
+<p>We are aware that our test set is publicly available. However we strongly adivse against cheating of any kind (usage of external data, hyperparameter searches on the test set, …) as we will examine the public repository of the awardees very thoroughly. <strong>Any detected misconduct of an awardee team will result in disqualification from the competition</strong>.</p>
+
+<ul>
+  <li>We only accept submissions that are fully reproducible (including any Hyperparameter searches)</li>
+  <li>The code repositories of all submissions have to be made public including instructions on how to train, make hyperparameter search and evaluate.</li>
+  <li>We do not allow the usage of external data. Only the usage of data provided by the <a href="../dataset">DataLoader</a> (training and validation set) is allowed.</li>
+  <li>The candidates for each prediction task <code class="language-plaintext highlighter-rouge">(h,r,?)</code> and <code class="language-plaintext highlighter-rouge">(?,r,t)</code> are all entities in the dataset (Important for approaches that rely on the generation of corrupted triples for evaluation)</li>
+</ul>
+
+
+</main>
+
+    
+    <footer class="footer">
+        <section class="footer__about">
+                <p class="footer__about__copyright">© Simon Ott 2021, <a href="/attributions.html">Icon attributions</a></p>
+                
+                <span class="divider">·</span>
+                
+                <span class="footer__about__theme"><p>theme</p><a id="simplex-logo" href="https://github.com/andreondra/jekyll-theme-simplex" target="_blank"><img alt="Simplex theme logo" src="/assets/img/icons/simplex_logo.svg"/></a><p>by <a href="https://ondrej.golasowski.com/">golas</a></p></span>
+        </section>
+</footer>
+    
+    <script src="/assets/js/jquery.slim.min.js"></script>
+<script src="/assets/js/lity.min.js"></script>
+<script src="/assets/js/tools.js"></script>
+</body>
+</html>
