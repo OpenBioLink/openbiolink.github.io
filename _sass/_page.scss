@@ -13,13 +13,24 @@
     @include flexbox{
         flex-direction: column;
         justify-content: flex-start;
-        align-items: center;
+        align-items: flex-start;
     }
 
     img{
         max-width: 100%;
     }
 
+    figure{
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+
+    table{
+        margin-left: auto;
+        margin-right: auto;
+    }
     
     h1{
         margin-right:auto;

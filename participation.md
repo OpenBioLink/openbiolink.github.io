@@ -9,25 +9,20 @@ permalink: /participation/
 1. Register your Team: TBD Link to registration form
 2. Make your submission: TBD Link to submission form
 
+Your team name will be made publicly available in our leaderboards together with your model performance. For the awardees of each dataset, the team member information will be also made publicly available.
+
 ## Evaluation
 
-To evaluate a trained model on a OpenBioLink dataset a subclass of `openbiolink.evaluation.evaluation.Evaluator` has to be created that implements the function `score_batch()` function. A reference to this class can be found [here](../obl2021.html#obl2021.OBL2021Evaluator).
+To evaluate a trained model for submission you have to use our provided evaluator `openbiolink.obl2021.OBL2021Evaluator`. The 
 
-### Implementing `__init__`
 
-The `Evaluator` class uses an instantiation of `openbiolink.evaluation.dataLoader.DataLoader`, which is used to download the specified version of the OpenBioLink dataset, see also (here)[""].
+### Same score policy
 
-### Implementing `score_batch()`
+You cannot treat positive scores different from negative scores. 
 
-The function `score_batch` is used to retrieve the scores of a set of test triples. It gets called with a tensor of batch test triples (shape `(batch_size, 3)`) and should return a tuple `(score_head, score_tail)`, two tensors of shape `(batch_size, num_entities)`. OpenBioLink is evaluated by corrupting the head/tail of a triple with all possible entities in the dataset. Consider $$\mathcal{K} = (\mathcal{E},\mathcal{R},\mathcal{T})$$ where $$\mathcal{E}$$ is the set of unique entities, $$\mathcal{R}$$ is the set of unique relations, and $$\mathcal{T}$$ are the triples in the dataset. Then the corrupted tail triples for a positive triple $$(h, r, t)$$ are $$(h, r, e)$$ for $$e \in \mathcal{E}$$ and the corrupted head triples are $$(e, r, t)$$ for $$e \in \mathcal{E}$$. The value of `score_head[i,j]` is then the score of `(j, batch[i,1], batch[i,2])`, while the value of `score_tail[i,j]` is the score of the triple `(batch[i,0], batch[i,1], j)`.
+## Minimal working example
 
-### Calling function `evaluate()`
-
-After the creation of a custom class that implements `Evaluator`, your approach can be evaluated by calling `evaluate(batch_size)` with the desired size of the batch that gets passed to `score_batch()`.
-
-### Example
-
-The following is a sketch of how to use the evaluator to create a submission file. Concrete examples of evaluating an embedding model trained with [dgl-ke]("") can be seen [here]("") and an example of evaluating the symbolic rule-based approach [AnyBURL/SAFRAN]("") can be seen [here]("").
+Following code produces the score and the file needed for submission. The file is generated in the location from where the script is started. For the submission you need to copy and paste the line that starts with `{'h10': ...` to the submission form.
 
 {% highlight python %}
 
@@ -35,26 +30,57 @@ The following is a sketch of how to use the evaluator to create a submission fil
 Import of the OpenBioLink Dataset and Evaluator.
 """
 import torch
+from tqdm import tqdm
 from openbiolink.obl2021 import OBL2021Dataset, OBL2021Evaluator
+from numpy.random import default_rng
 
-"""
-Implementation of the score_batch function of the OBL2021 class
-"""
-class MyEval(OBL2021Evaluator):
-    def __init__(self, model):
-        dl = OBL2021Dataset()
-        super().__init__(dl)
-        self.model = model
+class MockupModel:
+    def __init__(self):
+        self.rng = default_rng(0)
 
-    def score_batch(self, batch):
-        # of shape (batch.size()[0], self.dl.num_entities)
-        head_scores = self.model.score_heads(batch[:,1], batch[:,2]) 
-        # of shape (batch.size()[0], self.dl.num_entities)
-        tail_scores = self.model.score_tails(batch[:,0], batch[:,1]) 
-        return head_scores, tail_scores
+    def getTop10Heads(self, batch):
+        rand = []
+        for i in range(batch.shape[0]):
+            rand.append(self.rng.choice(180992, 10, replace=False))
+        return torch.tensor(rand)
+
+    def getTop10Tails(self, batch):
+        rand = []
+        for i in range(batch.shape[0]):
+            rand.append(self.rng.choice(180992, 10, replace=False))
+        return torch.tensor(rand)
+
+def main():
+    # Mockup Model
+    model = MockupModel()
+
+    # Initialize dataset and evaluator
+    dl = OBL2021Dataset()
+    ev = OBL2021Evaluator()
+
+    top10_heads = []
+    top10_tails = []
+
+    n_batches, batches = dl.get_test_batches(100)
+    for batch in tqdm(batches, total=n_batches):
+        top10_tails.append(model.getTop10Heads(batch))
+        top10_heads.append(model.getTop10Tails(batch))
+    top10_heads = torch.cat(top10_heads, dim=0)
+    top10_tails = torch.cat(top10_tails, dim=0)
+
+    ev.eval(top10_heads, top10_tails, dl.testing)
 
 if __name__ == "__main__":
-    ev = MyEval()
-    ev.evaluate(100)
-	
+    main()
+{% endhighlight %}
+
+Above code should result in the following output:
+
+{% highlight bash %}
+Dataset not found, downloading to C:/Users/MyUser/Desktop/obl2021 ...
+KGID_HQ_DIR.zip: 45.2MB [00:06, 7.47MB/s]                            
+100%|██████████| 1810/1810 [00:05<00:00, 311.50it/s]
+Submission file saved here: C:/Users/MyUser/Desktop/pred_OBL2021.npz
+Please copy the following line in the respective field of the submission form:
+{'h10': 4.697066833614372e-05}
 {% endhighlight %}
