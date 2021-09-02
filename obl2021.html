@@ -27,12 +27,10 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import os
-import time
+import pickle
 import urllib
 import zipfile
-from abc import ABC, abstractmethod
 from os import path
-from typing import Dict
 from typing import cast, Iterable, Tuple
 
 import numpy as np
@@ -42,7 +40,6 @@ from pykeen.utils import split_list_in_batches_iter
 from tqdm import tqdm
 
 from openbiolink.graph_creation.file_downloader import FileDownloader
-from collections import defaultdict
 
 
 class OBL2021Dataset(object):
@@ -51,14 +48,10 @@ class OBL2021Dataset(object):
         root: Pathlike string to directory in which dataset files should be stored
     &#34;&#34;&#34;
 
-    def __init__(self, root: str = &#39;dataset&#39;):
-        self._root = root
-        self._dataset_path = path.join(root, &#34;HQ_DIR&#34;)
-        self._relative_training_path = f&#39;train_test_data/train_sample.csv&#39;
-        self._relative_testing_path = f&#39;train_test_data/test_sample.csv&#39;
-        self._relative_validation_path = f&#39;train_test_data/val_sample.csv&#39;
-        self._url = r&#34;https://zenodo.org/record/3834052/files/HQ_DIR.zip&#34;
+    def __init__(self, root: str = &#39;obl2021&#39;):
 
+        self._dataset_path = root
+        self._url = r&#34;https://zenodo.org/record/5361324/files/KGID_HQ_DIR.zip&#34;
         self._download()
 
         self._entity_label_to_id = None
@@ -66,20 +59,38 @@ class OBL2021Dataset(object):
         self._relation_label_to_id = None
         self._id_to_relation_label = None
 
-        self._training = self._load(self._relative_training_path, True)
-        self._validation = self._load(self._relative_testing_path)
-        self._testing = self._load(self._relative_validation_path)
+        node_mapping = pd.read_csv(os.path.join(self._dataset_path, &#34;entities.tsv&#34;), sep=&#34;\t&#34;, header=None)
+        self._entity_label_to_id = {label: id for label, id in
+                                    zip(node_mapping[1], node_mapping[0])}
+        self._id_to_entity_label = {
+            id: label
+            for label, id in self._entity_label_to_id.items()
+        }
+
+        relation_mapping = pd.read_csv(os.path.join(self._dataset_path, &#34;relations.tsv&#34;), sep=&#34;\t&#34;, header=None)
+        self._relation_label_to_id = {label: id for label, id in
+                                      zip(relation_mapping[1],
+                                          relation_mapping[0])}
+        self._id_to_relation_label = {
+            id: label
+            for label, id in self._relation_label_to_id.items()
+        }
+
+        self._training = self._load(os.path.join(self._dataset_path, &#34;train.tsv&#34;))
+        self._validation = self._load(os.path.join(self._dataset_path, &#34;valid.tsv&#34;))
+        self._testing = self._load(os.path.join(self._dataset_path, &#34;test.tsv&#34;))
 
         self._num_entities = len(self._entity_label_to_id)
         self._num_relations = len(self._relation_label_to_id)
 
-        self._dict_of_heads = defaultdict(set)
-        self._dict_of_tails = defaultdict(set)
-        self._generate_dicts()
+        with open(os.path.join(self._dataset_path, &#39;_dict_of_heads.pkl&#39;), &#39;rb&#39;) as f:
+            self._dict_of_heads = pickle.load(f)
+        with open(os.path.join(self._dataset_path, &#39;_dict_of_tails.pkl&#39;), &#39;rb&#39;) as f:
+            self._dict_of_tails = pickle.load(f)
 
     def _download(self):
-        if not path.isdir(self._root):
-            os.mkdir(self._root)
+        if not path.isdir(self._dataset_path):
+            os.mkdir(self._dataset_path)
 
         # check if exists
         if not path.isdir(self._dataset_path) or not os.listdir(self._dataset_path):
@@ -90,74 +101,19 @@ class OBL2021Dataset(object):
             with tqdm(unit=&#39;B&#39;, unit_scale=True, unit_divisor=1024, miniters=1, desc=filename) as t:
                 zip_path, _ = urllib.request.urlretrieve(url, reporthook=FileDownloader.download_progress_hook(t))
                 with zipfile.ZipFile(zip_path, &#34;r&#34;) as f:
-                    f.extractall(self._root)
+                    f.extractall(self._dataset_path)
         else:
-            print(f&#34;Dataset found in {os.path.abspath(self._dataset_path)}, skipping download...&#34;)
+            print(f&#34;Dataset found in {os.path.abspath(self._dataset_path)}, omitting download...&#34;)
 
-    def _load(self, path_, create_index=False):
-        with open(path.join(self._dataset_path, path_)) as file:
+    def _load(self, path_):
+        with open(path_) as file:
             df = pd.read_csv(
                 file,
                 usecols=[0, 1, 2],
                 header=None,
                 sep=&#34;\t&#34;,
             )
-
-            if create_index:
-                self._create_mapping(df.values)
-            return self._map_triples(df.values)
-
-    def _create_mapping(self, triples):
-        # Split triples
-        heads, relations, tails = triples[:, 0], triples[:, 1], triples[:, 2]
-        # Sorting ensures consistent results when the triples are permuted
-        entity_labels = sorted(set(heads).union(tails))
-        relation_labels = sorted(set(relations))
-        # Create mapping
-        self._entity_label_to_id = {
-            str(label): i
-            for (i, label) in enumerate(entity_labels)
-        }
-        self._id_to_entity_label = {
-            id: label
-            for label, id in self._entity_label_to_id.items()
-        }
-        self._relation_label_to_id = {
-            str(label): i
-            for (i, label) in enumerate(relation_labels)
-        }
-        self._id_to_relation_label = {
-            id: label
-            for label, id in self._relation_label_to_id.items()
-        }
-
-    def _map_triples(self, triples):
-        # When triples that don&#39;t exist are trying to be mapped, they get the id &#34;-1&#34;
-        entity_getter = np.vectorize(self._entity_label_to_id.get)
-        head_column = entity_getter(triples[:, 0:1], [-1])
-        tail_column = entity_getter(triples[:, 2:3], [-1])
-        relation_getter = np.vectorize(self._relation_label_to_id.get)
-        relation_column = relation_getter(triples[:, 1:2], [-1])
-
-        # Filter all non-existent triples
-        head_filter = head_column &lt; 0
-        relation_filter = relation_column &lt; 0
-        tail_filter = tail_column &lt; 0
-        non_mappable_triples = (head_filter | relation_filter | tail_filter)
-        head_column = head_column[~non_mappable_triples, None]
-        relation_column = relation_column[~non_mappable_triples, None]
-        tail_column = tail_column[~non_mappable_triples, None]
-
-        triples_of_ids = np.concatenate([head_column, relation_column, tail_column], axis=1)
-        return torch.tensor(triples_of_ids, dtype=torch.long)
-
-    def _generate_dicts(self):
-        _all = torch.cat((self._training, self._validation, self._testing), 0)
-        for i in range(self._num_entities):
-            self._dict_of_heads[(_all[i, 0].item(),
-                                 _all[i, 1].item())].add(_all[i, 2].item())
-            self._dict_of_tails[(_all[i, 2].item(),
-                                 _all[i, 1].item())].add(_all[i, 0].item())
+            return torch.tensor(df.values)
 
     @property
     def num_entities(self) -&gt; int:
@@ -175,136 +131,138 @@ class OBL2021Dataset(object):
         return self._training
 
     @property
+    def testing(self) -&gt; torch.Tensor:
+        &#34;&#34;&#34;Set of test triples. Shape `(num_test, 3)`&#34;&#34;&#34;
+        return self._testing
+
+    @property
     def validation(self) -&gt; torch.Tensor:
         &#34;&#34;&#34;Set of validation triples. Shape `(num_val, 3)`&#34;&#34;&#34;
         return self._validation
 
     @property
-    def testing(self) -&gt; torch.Tensor:
-        &#34;&#34;&#34;Set of test triples. May only be used for generating the final evaluation. Shape `(num_train, 3)`&#34;&#34;&#34;
-        return self._testing
+    def candidates(self) -&gt; torch.Tensor:
+        &#34;&#34;&#34;Set of unfiltered candidates that can substitute for `?` in `(h,r,?)` and `(?,r,t)`. Shape (num_entities,)&#34;&#34;&#34;
+        return torch.arange(self.num_entities).long()
 
-    def _filter_scores(self, batch, filter_col, scores, filter_val):
+    @property
+    def stats(self) -&gt; str:
+        msg = &#34;# Triples: &#34;.ljust(15) + &#34;\n&#34;
+        msg = msg + &#34;&#34;.ljust(5) + &#34;Train &#34;.ljust(6) + str(self.training.size()[0]) + &#34;\n&#34;
+        msg = msg + &#34;&#34;.ljust(5) + &#34;Valid &#34;.ljust(6) + str(self.validation.size()[0]) + &#34;\n&#34;
+        msg = msg + &#34;&#34;.ljust(5) + &#34;Test &#34;.ljust(6) + str(self._testing.size()[0]) + &#34;\n&#34;
+        msg = msg + &#34;# Relations: &#34;.ljust(15) + str(self.num_relations) + &#34;\n&#34;
+        msg = msg + &#34;# Entities: &#34;.ljust(15) + str(self.num_entities) + &#34;\n&#34;
+        return msg
 
+    def filter_scores(self, batch, scores, filter_col, filter_val=float(&#39;-Inf&#39;)) -&gt; torch.Tensor:
+        &#34;&#34;&#34;
+        Filter scores by setting true scores to `filter_val`.
+
+        For simplicity, only the head-side is described, i.e. filter_col=0. The tail-side is processed alike.
+        For each (h, r, t) triple in the batch, the entity identifiers are computed such that (h&#39;, r, t) exists in all
+        positive triples.
+
+        Args:
+            batch: Batch of triples. Shape `(batch_size,3)`
+            scores: The scores for all corrupted triples (including the currently considered true triple). Are modified *in-place*. Shape `(batch_size,num_entities)`
+            filter_col: The column along which to filter. Allowed are {0, 2}, where 0 corresponds to filtering head-based and 2
+            corresponds to filtering tail-based.
+            filter_val: Value to which scores of already known triples are set, default -Inf
+
+        Returns:
+            A reference to the filtered scores, which have been updated in-place.
+        &#34;&#34;&#34;
         for i in range(batch.size()[0]):
             if filter_col == 0:
-                true_targets = torch.tensor(list(self._dict_of_heads[batch[i, 2].item(), batch[i, 1].item()])).long()
+                true_targets = self._dict_of_heads[batch[i, 2].item(), batch[i, 1].item()].copy()
+                true_targets.remove(batch[i, 0].item())
+                true_targets = torch.tensor(list(true_targets)).long()
             else:
-                true_targets = torch.tensor(list(self._dict_of_tails[batch[i, 0].item(), batch[i, 1].item()])).long()
-
+                true_targets = self._dict_of_tails[batch[i, 0].item(), batch[i, 1].item()].copy()
+                true_targets.remove(batch[i, 2].item())
+                true_targets = torch.tensor(list(true_targets)).long()
             scores[i][true_targets] = filter_val
         return scores
 
-    def _get_test_batches(self, batch_size=100) -&gt; (int, Iterable[torch.Tensor]):
-        num_bat = int(np.ceil(len(self.testing) / batch_size))
-        return num_bat, cast(Iterable[torch.Tensor], split_list_in_batches_iter(input_list=self._testing,batch_size=batch_size))
-
-
-class OBL2021Evaluator(ABC):
-    &#34;&#34;&#34;
-    Args:
-        dl: Dataloader containing the OpenBioLink dataset
-        higher_is_better: Boolean which should be set to `True` if higher scores are considered better, `False` otherwise.
-    &#34;&#34;&#34;
-
-    def __init__(self, dl: OBL2021Dataset, higher_is_better: bool = True):
-        self.dl: OBL2021Dataset = dl
-        self.higher_is_better = higher_is_better
-
-    def _get_ranking(self, y_pred_pos_head, y_pred_neg_head, y_pred_pos_tail, y_pred_neg_tail):
-        if self.higher_is_better:
-            ranking_head = torch.sum(y_pred_neg_head &gt;= y_pred_pos_head.view(-1, 1), dim=1) + 1
-            ranking_tail = torch.sum(y_pred_neg_tail &gt;= y_pred_pos_tail.view(-1, 1), dim=1) + 1
-        else:
-            ranking_head = torch.sum(y_pred_neg_head &lt;= y_pred_pos_head.view(-1, 1), dim=1) + 1
-            ranking_tail = torch.sum(y_pred_neg_tail &lt;= y_pred_pos_tail.view(-1, 1), dim=1) + 1
-        ranking_list = torch.cat([ranking_head, ranking_tail], dim=0)
-        return ranking_list
-
-    def _get_result(self, ranking_lists: list):
-        hits1 = 0.
-        hits3 = 0.
-        hits10 = 0.
-        mrr = 0.
-        count = 0
-        for ranking_list in ranking_lists:
-            hits1 = hits1 + (ranking_list &lt;= 1).sum()
-            hits3 = hits3 + (ranking_list &lt;= 3).sum()
-            hits10 = hits10 + (ranking_list &lt;= 10).sum()
-            mrr = mrr + (1. / ranking_list).sum()
-            count = count + ranking_list.shape[0]
-        return {&#39;hits@1&#39;: hits1 / count,
-                &#39;hits@3&#39;: hits3 / count,
-                &#39;hits@10&#39;: hits10 / count,
-                &#39;mrr&#39;: mrr / count}
-
-    def _evaluate_batch(self, batch):
-        scores_head, scores_tail = self.score_batch(batch)
-        pos_scores_head = scores_head.gather(1, batch[:, 0].view(-1, 1)).view(-1, 1)
-        pos_scores_tail = scores_tail.gather(1, batch[:, 2].view(-1, 1)).view(-1, 1)
-        neg_scores_head = self.dl._filter_scores(
-            batch,
-            0,
-            scores_head,
-            float(&#39;nan&#39;) if self.higher_is_better else float(&#39;Inf&#39;)
-        )
-        neg_scores_tail = self.dl._filter_scores(
-            batch,
-            2,
-            scores_tail,
-            float(&#39;nan&#39;) if self.higher_is_better else float(&#39;Inf&#39;)
-        )
-        return self._get_ranking(pos_scores_head, neg_scores_head, pos_scores_tail, neg_scores_tail)
-
-    def evaluate(self, batch_size=100) -&gt; Dict[str, float]:
-        &#34;&#34;&#34;Evaluates a model by retrieving scores from the (implemented) score_batch function.
+    def get_test_batches(self, batch_size=100) -&gt; Tuple[int, Iterable[torch.Tensor]]:
+        &#34;&#34;&#34;Splits the test set into batches of fixed size
 
         Args:
-            batch_size:
-                Integer determining the size of the test batch which is passed to function `score_batch`
-
+            batch_size: Size of a batch
         Returns:
-            Dictionary containing the evaluation results (keys: &#39;hits@1&#39;, &#39;hits@3&#39;, &#39;hits@10&#39;, &#39;mrr&#39;)
+            A tuple containing the number of batches and an iterable to the batches.
         &#34;&#34;&#34;
+        num_bat = int(np.ceil(len(self._testing) / batch_size))
+        return num_bat, cast(Iterable[torch.Tensor],
+                             split_list_in_batches_iter(input_list=self._testing, batch_size=batch_size))
 
-        start = time.time()
-        n_batches, batches = self.dl._get_test_batches(batch_size)
 
-        result = []
-        for batch in tqdm(batches, total=n_batches):
-            result.append(self._evaluate_batch(batch))
+class OBL2021Evaluator:
 
-        print(&#39;Evaluation took {:.3f} seconds&#39;.format(time.time() - start))
-        return self._get_result(result)
-
-    @abstractmethod
-    def score_batch(self, batch: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
-        &#34;&#34;&#34; .. important:: Abstract function, has to be implemented
-
-        Should return two arrays containing the head and tail scores of a batch of test data from a model.
+    def eval(self, h_pred_top10, t_pred_top10, triples, save_submission=True):
+        &#34;&#34;&#34;
+        Evaluates ranked lists of head and tail entity predictions for a set of evaluation triples. By default creates a submission file.
 
         Args:
-            batch: Batch of test data. Shape `(batch_size,3)`
-
-        Returns:
-            head_scores: `torch.tensor` where the value at [i,j] is the score of the triple `(j, batch[i][1], batch[i][2])`. Shape `(batch_size, num_entities)`
-            tail_scores: `torch.tensor` where the value at [i,j] is the score of the triple `(batch[i][0], batch[i][1], j)`. Shape `(batch_size, num_entities)`
+            h_pred_top10: Top 10 predictions for the head entity. The value at (i,j) is the ID of the predicted head entity with rank `j+1` for the triple `triples[i]`. Shape `(num_eval_triplets,10)`
+            t_pred_top10: Top 10 predictions for the tail entity. The value at (i,j) is the ID of the predicted tail entity with rank `j+1` for the triple `triples[i]`. Shape `(num_eval_triplets,10)`
+            triples: Set of evaluation triples. Shape `(num_eval_triplets,3)`
+            save_submission: If true a submission file is created. Default: True
         &#34;&#34;&#34;
-        raise NotImplementedError
 
+        assert t_pred_top10.shape[1] == h_pred_top10.shape[1] == 10 and t_pred_top10.shape[0] == h_pred_top10.shape[
+            0] == triples.shape[0]
 
-class MyEval(OBL2021Evaluator):
-    def __init__(self):
-        dl = OBL2021Dataset()
-        super().__init__(dl)
+        # h,r-&gt;t
+        t_pred_top10 = self._to_torch(t_pred_top10)
+        t_correct_index = self._to_torch(triples[:, 2])
+        h_pred_top10 = self._to_torch(h_pred_top10)
+        h_correct_index = self._to_torch(triples[:, 0])
+        pred_top10 = torch.cat((t_pred_top10, h_pred_top10), dim=0)
+        correct_index = torch.cat((t_correct_index, h_correct_index), dim=0)
 
-    def score_batch(self, batch):
-        return torch.randn(batch.size()[0], self.dl.num_entities), torch.zeros(batch.size()[0], self.dl.num_entities)
+        h10 = self._calculate_h10(correct_index.to(pred_top10.device), pred_top10)
+        if save_submission is True:
+            self._save_test_submission(pred_top10)
 
+        print(&#34;Please copy also the following line in the respective field of the submission form:&#34;)
+        print({&#39;h10&#39;: h10})
 
-if __name__ == &#34;__main__&#34;:
-    ev = MyEval()
-    print(ev.evaluate(100))</code></pre>
+    def _to_torch(self, container):
+        if not isinstance(container, torch.Tensor):
+            container = torch.from_numpy(container)
+        return container
+
+    def _calculate_mrr(self, correct_index, pred_top10):
+        # extract indices where correct_index is within top10
+        tmp = torch.nonzero(correct_index.view(-1, 1) == pred_top10, as_tuple=False)
+
+        # reciprocal rank
+        # if rank is larger than 10, then set the reciprocal rank to 0.
+        rr = torch.zeros(len(correct_index)).to(tmp.device)
+        rr[tmp[:, 0]] = 1. / (tmp[:, 1].float() + 1.)
+
+        # mean reciprocal rank
+        return float(rr.mean().item())
+
+    def _calculate_h10(self, correct_index, pred_top10):
+        # extract indices where correct_index is within top10
+        total_h10 = torch.sum(torch.any(correct_index.view(-1, 1) == pred_top10, dim=1))
+
+        return float(total_h10 / correct_index.shape[0])
+
+    def _save_test_submission(self, pred_top10):
+
+        assert pred_top10.shape == (361928, 10)
+
+        if isinstance(pred_top10, torch.Tensor):
+            pred_top10 = pred_top10.cpu().numpy()
+        pred_top10 = pred_top10.astype(np.int32)
+
+        filename = os.path.abspath(&#39;pred_OBL2021&#39;)
+        np.savez_compressed(filename, pred_top10=pred_top10)
+        print(&#34;Submission file saved here: &#34; + filename)</code></pre>
 </details>
 </section>
 <section>
@@ -316,47 +274,9 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="obl2021.MyEval"><code class="flex name class">
-<span>class <span class="ident">MyEval</span></span>
-</code></dt>
-<dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>dl</code></strong></dt>
-<dd>Dataloader containing the OpenBioLink dataset</dd>
-<dt><strong><code>higher_is_better</code></strong></dt>
-<dd>Boolean which should be set to <code>True</code> if higher scores are considered better, <code>False</code> otherwise.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MyEval(OBL2021Evaluator):
-    def __init__(self):
-        dl = OBL2021Dataset()
-        super().__init__(dl)
-
-    def score_batch(self, batch):
-        return torch.randn(batch.size()[0], self.dl.num_entities), torch.zeros(batch.size()[0], self.dl.num_entities)</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="obl2021.OBL2021Evaluator" href="#obl2021.OBL2021Evaluator">OBL2021Evaluator</a></li>
-<li>abc.ABC</li>
-</ul>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="obl2021.OBL2021Evaluator" href="#obl2021.OBL2021Evaluator">OBL2021Evaluator</a></b></code>:
-<ul class="hlist">
-<li><code><a title="obl2021.OBL2021Evaluator.evaluate" href="#obl2021.OBL2021Evaluator.evaluate">evaluate</a></code></li>
-<li><code><a title="obl2021.OBL2021Evaluator.score_batch" href="#obl2021.OBL2021Evaluator.score_batch">score_batch</a></code></li>
-</ul>
-</li>
-</ul>
-</dd>
 <dt id="obl2021.OBL2021Dataset"><code class="flex name class">
 <span>class <span class="ident">OBL2021Dataset</span></span>
-<span>(</span><span>root: str = 'dataset')</span>
+<span>(</span><span>root: str = 'obl2021')</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -374,14 +294,10 @@ if __name__ == &#34;__main__&#34;:
         root: Pathlike string to directory in which dataset files should be stored
     &#34;&#34;&#34;
 
-    def __init__(self, root: str = &#39;dataset&#39;):
-        self._root = root
-        self._dataset_path = path.join(root, &#34;HQ_DIR&#34;)
-        self._relative_training_path = f&#39;train_test_data/train_sample.csv&#39;
-        self._relative_testing_path = f&#39;train_test_data/test_sample.csv&#39;
-        self._relative_validation_path = f&#39;train_test_data/val_sample.csv&#39;
-        self._url = r&#34;https://zenodo.org/record/3834052/files/HQ_DIR.zip&#34;
+    def __init__(self, root: str = &#39;obl2021&#39;):
 
+        self._dataset_path = root
+        self._url = r&#34;https://zenodo.org/record/5361324/files/KGID_HQ_DIR.zip&#34;
         self._download()
 
         self._entity_label_to_id = None
@@ -389,20 +305,38 @@ if __name__ == &#34;__main__&#34;:
         self._relation_label_to_id = None
         self._id_to_relation_label = None
 
-        self._training = self._load(self._relative_training_path, True)
-        self._validation = self._load(self._relative_testing_path)
-        self._testing = self._load(self._relative_validation_path)
+        node_mapping = pd.read_csv(os.path.join(self._dataset_path, &#34;entities.tsv&#34;), sep=&#34;\t&#34;, header=None)
+        self._entity_label_to_id = {label: id for label, id in
+                                    zip(node_mapping[1], node_mapping[0])}
+        self._id_to_entity_label = {
+            id: label
+            for label, id in self._entity_label_to_id.items()
+        }
+
+        relation_mapping = pd.read_csv(os.path.join(self._dataset_path, &#34;relations.tsv&#34;), sep=&#34;\t&#34;, header=None)
+        self._relation_label_to_id = {label: id for label, id in
+                                      zip(relation_mapping[1],
+                                          relation_mapping[0])}
+        self._id_to_relation_label = {
+            id: label
+            for label, id in self._relation_label_to_id.items()
+        }
+
+        self._training = self._load(os.path.join(self._dataset_path, &#34;train.tsv&#34;))
+        self._validation = self._load(os.path.join(self._dataset_path, &#34;valid.tsv&#34;))
+        self._testing = self._load(os.path.join(self._dataset_path, &#34;test.tsv&#34;))
 
         self._num_entities = len(self._entity_label_to_id)
         self._num_relations = len(self._relation_label_to_id)
 
-        self._dict_of_heads = defaultdict(set)
-        self._dict_of_tails = defaultdict(set)
-        self._generate_dicts()
+        with open(os.path.join(self._dataset_path, &#39;_dict_of_heads.pkl&#39;), &#39;rb&#39;) as f:
+            self._dict_of_heads = pickle.load(f)
+        with open(os.path.join(self._dataset_path, &#39;_dict_of_tails.pkl&#39;), &#39;rb&#39;) as f:
+            self._dict_of_tails = pickle.load(f)
 
     def _download(self):
-        if not path.isdir(self._root):
-            os.mkdir(self._root)
+        if not path.isdir(self._dataset_path):
+            os.mkdir(self._dataset_path)
 
         # check if exists
         if not path.isdir(self._dataset_path) or not os.listdir(self._dataset_path):
@@ -413,74 +347,19 @@ if __name__ == &#34;__main__&#34;:
             with tqdm(unit=&#39;B&#39;, unit_scale=True, unit_divisor=1024, miniters=1, desc=filename) as t:
                 zip_path, _ = urllib.request.urlretrieve(url, reporthook=FileDownloader.download_progress_hook(t))
                 with zipfile.ZipFile(zip_path, &#34;r&#34;) as f:
-                    f.extractall(self._root)
+                    f.extractall(self._dataset_path)
         else:
-            print(f&#34;Dataset found in {os.path.abspath(self._dataset_path)}, skipping download...&#34;)
+            print(f&#34;Dataset found in {os.path.abspath(self._dataset_path)}, omitting download...&#34;)
 
-    def _load(self, path_, create_index=False):
-        with open(path.join(self._dataset_path, path_)) as file:
+    def _load(self, path_):
+        with open(path_) as file:
             df = pd.read_csv(
                 file,
                 usecols=[0, 1, 2],
                 header=None,
                 sep=&#34;\t&#34;,
             )
-
-            if create_index:
-                self._create_mapping(df.values)
-            return self._map_triples(df.values)
-
-    def _create_mapping(self, triples):
-        # Split triples
-        heads, relations, tails = triples[:, 0], triples[:, 1], triples[:, 2]
-        # Sorting ensures consistent results when the triples are permuted
-        entity_labels = sorted(set(heads).union(tails))
-        relation_labels = sorted(set(relations))
-        # Create mapping
-        self._entity_label_to_id = {
-            str(label): i
-            for (i, label) in enumerate(entity_labels)
-        }
-        self._id_to_entity_label = {
-            id: label
-            for label, id in self._entity_label_to_id.items()
-        }
-        self._relation_label_to_id = {
-            str(label): i
-            for (i, label) in enumerate(relation_labels)
-        }
-        self._id_to_relation_label = {
-            id: label
-            for label, id in self._relation_label_to_id.items()
-        }
-
-    def _map_triples(self, triples):
-        # When triples that don&#39;t exist are trying to be mapped, they get the id &#34;-1&#34;
-        entity_getter = np.vectorize(self._entity_label_to_id.get)
-        head_column = entity_getter(triples[:, 0:1], [-1])
-        tail_column = entity_getter(triples[:, 2:3], [-1])
-        relation_getter = np.vectorize(self._relation_label_to_id.get)
-        relation_column = relation_getter(triples[:, 1:2], [-1])
-
-        # Filter all non-existent triples
-        head_filter = head_column &lt; 0
-        relation_filter = relation_column &lt; 0
-        tail_filter = tail_column &lt; 0
-        non_mappable_triples = (head_filter | relation_filter | tail_filter)
-        head_column = head_column[~non_mappable_triples, None]
-        relation_column = relation_column[~non_mappable_triples, None]
-        tail_column = tail_column[~non_mappable_triples, None]
-
-        triples_of_ids = np.concatenate([head_column, relation_column, tail_column], axis=1)
-        return torch.tensor(triples_of_ids, dtype=torch.long)
-
-    def _generate_dicts(self):
-        _all = torch.cat((self._training, self._validation, self._testing), 0)
-        for i in range(self._num_entities):
-            self._dict_of_heads[(_all[i, 0].item(),
-                                 _all[i, 1].item())].add(_all[i, 2].item())
-            self._dict_of_tails[(_all[i, 2].item(),
-                                 _all[i, 1].item())].add(_all[i, 0].item())
+            return torch.tensor(df.values)
 
     @property
     def num_entities(self) -&gt; int:
@@ -498,32 +377,87 @@ if __name__ == &#34;__main__&#34;:
         return self._training
 
     @property
+    def testing(self) -&gt; torch.Tensor:
+        &#34;&#34;&#34;Set of test triples. Shape `(num_test, 3)`&#34;&#34;&#34;
+        return self._testing
+
+    @property
     def validation(self) -&gt; torch.Tensor:
         &#34;&#34;&#34;Set of validation triples. Shape `(num_val, 3)`&#34;&#34;&#34;
         return self._validation
 
     @property
-    def testing(self) -&gt; torch.Tensor:
-        &#34;&#34;&#34;Set of test triples. May only be used for generating the final evaluation. Shape `(num_train, 3)`&#34;&#34;&#34;
-        return self._testing
+    def candidates(self) -&gt; torch.Tensor:
+        &#34;&#34;&#34;Set of unfiltered candidates that can substitute for `?` in `(h,r,?)` and `(?,r,t)`. Shape (num_entities,)&#34;&#34;&#34;
+        return torch.arange(self.num_entities).long()
 
-    def _filter_scores(self, batch, filter_col, scores, filter_val):
+    @property
+    def stats(self) -&gt; str:
+        msg = &#34;# Triples: &#34;.ljust(15) + &#34;\n&#34;
+        msg = msg + &#34;&#34;.ljust(5) + &#34;Train &#34;.ljust(6) + str(self.training.size()[0]) + &#34;\n&#34;
+        msg = msg + &#34;&#34;.ljust(5) + &#34;Valid &#34;.ljust(6) + str(self.validation.size()[0]) + &#34;\n&#34;
+        msg = msg + &#34;&#34;.ljust(5) + &#34;Test &#34;.ljust(6) + str(self._testing.size()[0]) + &#34;\n&#34;
+        msg = msg + &#34;# Relations: &#34;.ljust(15) + str(self.num_relations) + &#34;\n&#34;
+        msg = msg + &#34;# Entities: &#34;.ljust(15) + str(self.num_entities) + &#34;\n&#34;
+        return msg
 
+    def filter_scores(self, batch, scores, filter_col, filter_val=float(&#39;-Inf&#39;)) -&gt; torch.Tensor:
+        &#34;&#34;&#34;
+        Filter scores by setting true scores to `filter_val`.
+
+        For simplicity, only the head-side is described, i.e. filter_col=0. The tail-side is processed alike.
+        For each (h, r, t) triple in the batch, the entity identifiers are computed such that (h&#39;, r, t) exists in all
+        positive triples.
+
+        Args:
+            batch: Batch of triples. Shape `(batch_size,3)`
+            scores: The scores for all corrupted triples (including the currently considered true triple). Are modified *in-place*. Shape `(batch_size,num_entities)`
+            filter_col: The column along which to filter. Allowed are {0, 2}, where 0 corresponds to filtering head-based and 2
+            corresponds to filtering tail-based.
+            filter_val: Value to which scores of already known triples are set, default -Inf
+
+        Returns:
+            A reference to the filtered scores, which have been updated in-place.
+        &#34;&#34;&#34;
         for i in range(batch.size()[0]):
             if filter_col == 0:
-                true_targets = torch.tensor(list(self._dict_of_heads[batch[i, 2].item(), batch[i, 1].item()])).long()
+                true_targets = self._dict_of_heads[batch[i, 2].item(), batch[i, 1].item()].copy()
+                true_targets.remove(batch[i, 0].item())
+                true_targets = torch.tensor(list(true_targets)).long()
             else:
-                true_targets = torch.tensor(list(self._dict_of_tails[batch[i, 0].item(), batch[i, 1].item()])).long()
-
+                true_targets = self._dict_of_tails[batch[i, 0].item(), batch[i, 1].item()].copy()
+                true_targets.remove(batch[i, 2].item())
+                true_targets = torch.tensor(list(true_targets)).long()
             scores[i][true_targets] = filter_val
         return scores
 
-    def _get_test_batches(self, batch_size=100) -&gt; (int, Iterable[torch.Tensor]):
-        num_bat = int(np.ceil(len(self.testing) / batch_size))
-        return num_bat, cast(Iterable[torch.Tensor], split_list_in_batches_iter(input_list=self._testing,batch_size=batch_size))</code></pre>
+    def get_test_batches(self, batch_size=100) -&gt; Tuple[int, Iterable[torch.Tensor]]:
+        &#34;&#34;&#34;Splits the test set into batches of fixed size
+
+        Args:
+            batch_size: Size of a batch
+        Returns:
+            A tuple containing the number of batches and an iterable to the batches.
+        &#34;&#34;&#34;
+        num_bat = int(np.ceil(len(self._testing) / batch_size))
+        return num_bat, cast(Iterable[torch.Tensor],
+                             split_list_in_batches_iter(input_list=self._testing, batch_size=batch_size))</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
+<dt id="obl2021.OBL2021Dataset.candidates"><code class="name">var <span class="ident">candidates</span> : torch.Tensor</code></dt>
+<dd>
+<div class="desc"><p>Set of unfiltered candidates that can substitute for <code>?</code> in <code>(h,r,?)</code> and <code>(?,r,t)</code>. Shape (num_entities,)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def candidates(self) -&gt; torch.Tensor:
+    &#34;&#34;&#34;Set of unfiltered candidates that can substitute for `?` in `(h,r,?)` and `(?,r,t)`. Shape (num_entities,)&#34;&#34;&#34;
+    return torch.arange(self.num_entities).long()</code></pre>
+</details>
+</dd>
 <dt id="obl2021.OBL2021Dataset.num_entities"><code class="name">var <span class="ident">num_entities</span> : int</code></dt>
 <dd>
 <div class="desc"><p>Number of entities in the dataset</p></div>
@@ -550,16 +484,34 @@ def num_relations(self) -&gt; int:
     return self._num_relations</code></pre>
 </details>
 </dd>
+<dt id="obl2021.OBL2021Dataset.stats"><code class="name">var <span class="ident">stats</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def stats(self) -&gt; str:
+    msg = &#34;# Triples: &#34;.ljust(15) + &#34;\n&#34;
+    msg = msg + &#34;&#34;.ljust(5) + &#34;Train &#34;.ljust(6) + str(self.training.size()[0]) + &#34;\n&#34;
+    msg = msg + &#34;&#34;.ljust(5) + &#34;Valid &#34;.ljust(6) + str(self.validation.size()[0]) + &#34;\n&#34;
+    msg = msg + &#34;&#34;.ljust(5) + &#34;Test &#34;.ljust(6) + str(self._testing.size()[0]) + &#34;\n&#34;
+    msg = msg + &#34;# Relations: &#34;.ljust(15) + str(self.num_relations) + &#34;\n&#34;
+    msg = msg + &#34;# Entities: &#34;.ljust(15) + str(self.num_entities) + &#34;\n&#34;
+    return msg</code></pre>
+</details>
+</dd>
 <dt id="obl2021.OBL2021Dataset.testing"><code class="name">var <span class="ident">testing</span> : torch.Tensor</code></dt>
 <dd>
-<div class="desc"><p>Set of test triples. May only be used for generating the final evaluation. Shape <code>(num_train, 3)</code></p></div>
+<div class="desc"><p>Set of test triples. Shape <code>(num_test, 3)</code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def testing(self) -&gt; torch.Tensor:
-    &#34;&#34;&#34;Set of test triples. May only be used for generating the final evaluation. Shape `(num_train, 3)`&#34;&#34;&#34;
+    &#34;&#34;&#34;Set of test triples. Shape `(num_test, 3)`&#34;&#34;&#34;
     return self._testing</code></pre>
 </details>
 </dd>
@@ -590,199 +542,221 @@ def validation(self) -&gt; torch.Tensor:
 </details>
 </dd>
 </dl>
-</dd>
-<dt id="obl2021.OBL2021Evaluator"><code class="flex name class">
-<span>class <span class="ident">OBL2021Evaluator</span></span>
-<span>(</span><span>dl: <a title="obl2021.OBL2021Dataset" href="#obl2021.OBL2021Dataset">OBL2021Dataset</a>, higher_is_better: bool = True)</span>
-</code></dt>
-<dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>dl</code></strong></dt>
-<dd>Dataloader containing the OpenBioLink dataset</dd>
-<dt><strong><code>higher_is_better</code></strong></dt>
-<dd>Boolean which should be set to <code>True</code> if higher scores are considered better, <code>False</code> otherwise.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class OBL2021Evaluator(ABC):
-    &#34;&#34;&#34;
-    Args:
-        dl: Dataloader containing the OpenBioLink dataset
-        higher_is_better: Boolean which should be set to `True` if higher scores are considered better, `False` otherwise.
-    &#34;&#34;&#34;
-
-    def __init__(self, dl: OBL2021Dataset, higher_is_better: bool = True):
-        self.dl: OBL2021Dataset = dl
-        self.higher_is_better = higher_is_better
-
-    def _get_ranking(self, y_pred_pos_head, y_pred_neg_head, y_pred_pos_tail, y_pred_neg_tail):
-        if self.higher_is_better:
-            ranking_head = torch.sum(y_pred_neg_head &gt;= y_pred_pos_head.view(-1, 1), dim=1) + 1
-            ranking_tail = torch.sum(y_pred_neg_tail &gt;= y_pred_pos_tail.view(-1, 1), dim=1) + 1
-        else:
-            ranking_head = torch.sum(y_pred_neg_head &lt;= y_pred_pos_head.view(-1, 1), dim=1) + 1
-            ranking_tail = torch.sum(y_pred_neg_tail &lt;= y_pred_pos_tail.view(-1, 1), dim=1) + 1
-        ranking_list = torch.cat([ranking_head, ranking_tail], dim=0)
-        return ranking_list
-
-    def _get_result(self, ranking_lists: list):
-        hits1 = 0.
-        hits3 = 0.
-        hits10 = 0.
-        mrr = 0.
-        count = 0
-        for ranking_list in ranking_lists:
-            hits1 = hits1 + (ranking_list &lt;= 1).sum()
-            hits3 = hits3 + (ranking_list &lt;= 3).sum()
-            hits10 = hits10 + (ranking_list &lt;= 10).sum()
-            mrr = mrr + (1. / ranking_list).sum()
-            count = count + ranking_list.shape[0]
-        return {&#39;hits@1&#39;: hits1 / count,
-                &#39;hits@3&#39;: hits3 / count,
-                &#39;hits@10&#39;: hits10 / count,
-                &#39;mrr&#39;: mrr / count}
-
-    def _evaluate_batch(self, batch):
-        scores_head, scores_tail = self.score_batch(batch)
-        pos_scores_head = scores_head.gather(1, batch[:, 0].view(-1, 1)).view(-1, 1)
-        pos_scores_tail = scores_tail.gather(1, batch[:, 2].view(-1, 1)).view(-1, 1)
-        neg_scores_head = self.dl._filter_scores(
-            batch,
-            0,
-            scores_head,
-            float(&#39;nan&#39;) if self.higher_is_better else float(&#39;Inf&#39;)
-        )
-        neg_scores_tail = self.dl._filter_scores(
-            batch,
-            2,
-            scores_tail,
-            float(&#39;nan&#39;) if self.higher_is_better else float(&#39;Inf&#39;)
-        )
-        return self._get_ranking(pos_scores_head, neg_scores_head, pos_scores_tail, neg_scores_tail)
-
-    def evaluate(self, batch_size=100) -&gt; Dict[str, float]:
-        &#34;&#34;&#34;Evaluates a model by retrieving scores from the (implemented) score_batch function.
-
-        Args:
-            batch_size:
-                Integer determining the size of the test batch which is passed to function `score_batch`
-
-        Returns:
-            Dictionary containing the evaluation results (keys: &#39;hits@1&#39;, &#39;hits@3&#39;, &#39;hits@10&#39;, &#39;mrr&#39;)
-        &#34;&#34;&#34;
-
-        start = time.time()
-        n_batches, batches = self.dl._get_test_batches(batch_size)
-
-        result = []
-        for batch in tqdm(batches, total=n_batches):
-            result.append(self._evaluate_batch(batch))
-
-        print(&#39;Evaluation took {:.3f} seconds&#39;.format(time.time() - start))
-        return self._get_result(result)
-
-    @abstractmethod
-    def score_batch(self, batch: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
-        &#34;&#34;&#34; .. important:: Abstract function, has to be implemented
-
-        Should return two arrays containing the head and tail scores of a batch of test data from a model.
-
-        Args:
-            batch: Batch of test data. Shape `(batch_size,3)`
-
-        Returns:
-            head_scores: `torch.tensor` where the value at [i,j] is the score of the triple `(j, batch[i][1], batch[i][2])`. Shape `(batch_size, num_entities)`
-            tail_scores: `torch.tensor` where the value at [i,j] is the score of the triple `(batch[i][0], batch[i][1], j)`. Shape `(batch_size, num_entities)`
-        &#34;&#34;&#34;
-        raise NotImplementedError</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>abc.ABC</li>
-</ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="obl2021.MyEval" href="#obl2021.MyEval">MyEval</a></li>
-</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="obl2021.OBL2021Evaluator.evaluate"><code class="name flex">
-<span>def <span class="ident">evaluate</span></span>(<span>self, batch_size=100) ‑> Dict[str, float]</span>
+<dt id="obl2021.OBL2021Dataset.filter_scores"><code class="name flex">
+<span>def <span class="ident">filter_scores</span></span>(<span>self, batch, scores, filter_col, filter_val=-inf) ‑> torch.Tensor</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Evaluates a model by retrieving scores from the (implemented) score_batch function.</p>
-<h2 id="args">Args</h2>
-<p>batch_size:
-Integer determining the size of the test batch which is passed to function <code>score_batch</code></p>
-<h2 id="returns">Returns</h2>
-<p>Dictionary containing the evaluation results (keys: 'hits@1', 'hits@3', 'hits@10', 'mrr')</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def evaluate(self, batch_size=100) -&gt; Dict[str, float]:
-    &#34;&#34;&#34;Evaluates a model by retrieving scores from the (implemented) score_batch function.
-
-    Args:
-        batch_size:
-            Integer determining the size of the test batch which is passed to function `score_batch`
-
-    Returns:
-        Dictionary containing the evaluation results (keys: &#39;hits@1&#39;, &#39;hits@3&#39;, &#39;hits@10&#39;, &#39;mrr&#39;)
-    &#34;&#34;&#34;
-
-    start = time.time()
-    n_batches, batches = self.dl._get_test_batches(batch_size)
-
-    result = []
-    for batch in tqdm(batches, total=n_batches):
-        result.append(self._evaluate_batch(batch))
-
-    print(&#39;Evaluation took {:.3f} seconds&#39;.format(time.time() - start))
-    return self._get_result(result)</code></pre>
-</details>
-</dd>
-<dt id="obl2021.OBL2021Evaluator.score_batch"><code class="name flex">
-<span>def <span class="ident">score_batch</span></span>(<span>self, batch: torch.Tensor) ‑> Tuple[torch.Tensor, torch.Tensor]</span>
-</code></dt>
-<dd>
-<div class="desc"><div class="admonition important">
-<p class="admonition-title">Important:&ensp;Abstract function, has to be implemented</p>
-</div>
-<p>Should return two arrays containing the head and tail scores of a batch of test data from a model.</p>
+<div class="desc"><p>Filter scores by setting true scores to <code>filter_val</code>.</p>
+<p>For simplicity, only the head-side is described, i.e. filter_col=0. The tail-side is processed alike.
+For each (h, r, t) triple in the batch, the entity identifiers are computed such that (h', r, t) exists in all
+positive triples.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>batch</code></strong></dt>
-<dd>Batch of test data. Shape <code>(batch_size,3)</code></dd>
+<dd>Batch of triples. Shape <code>(batch_size,3)</code></dd>
+<dt><strong><code>scores</code></strong></dt>
+<dd>The scores for all corrupted triples (including the currently considered true triple). Are modified <em>in-place</em>. Shape <code>(batch_size,num_entities)</code></dd>
+<dt><strong><code>filter_col</code></strong></dt>
+<dd>The column along which to filter. Allowed are {0, 2}, where 0 corresponds to filtering head-based and 2</dd>
+<dt>corresponds to filtering tail-based.</dt>
+<dt><strong><code>filter_val</code></strong></dt>
+<dd>Value to which scores of already known triples are set, default -Inf</dd>
 </dl>
 <h2 id="returns">Returns</h2>
+<p>A reference to the filtered scores, which have been updated in-place.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def filter_scores(self, batch, scores, filter_col, filter_val=float(&#39;-Inf&#39;)) -&gt; torch.Tensor:
+    &#34;&#34;&#34;
+    Filter scores by setting true scores to `filter_val`.
+
+    For simplicity, only the head-side is described, i.e. filter_col=0. The tail-side is processed alike.
+    For each (h, r, t) triple in the batch, the entity identifiers are computed such that (h&#39;, r, t) exists in all
+    positive triples.
+
+    Args:
+        batch: Batch of triples. Shape `(batch_size,3)`
+        scores: The scores for all corrupted triples (including the currently considered true triple). Are modified *in-place*. Shape `(batch_size,num_entities)`
+        filter_col: The column along which to filter. Allowed are {0, 2}, where 0 corresponds to filtering head-based and 2
+        corresponds to filtering tail-based.
+        filter_val: Value to which scores of already known triples are set, default -Inf
+
+    Returns:
+        A reference to the filtered scores, which have been updated in-place.
+    &#34;&#34;&#34;
+    for i in range(batch.size()[0]):
+        if filter_col == 0:
+            true_targets = self._dict_of_heads[batch[i, 2].item(), batch[i, 1].item()].copy()
+            true_targets.remove(batch[i, 0].item())
+            true_targets = torch.tensor(list(true_targets)).long()
+        else:
+            true_targets = self._dict_of_tails[batch[i, 0].item(), batch[i, 1].item()].copy()
+            true_targets.remove(batch[i, 2].item())
+            true_targets = torch.tensor(list(true_targets)).long()
+        scores[i][true_targets] = filter_val
+    return scores</code></pre>
+</details>
+</dd>
+<dt id="obl2021.OBL2021Dataset.get_test_batches"><code class="name flex">
+<span>def <span class="ident">get_test_batches</span></span>(<span>self, batch_size=100) ‑> Tuple[int, Iterable[torch.Tensor]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Splits the test set into batches of fixed size</p>
+<h2 id="args">Args</h2>
 <dl>
-<dt><code>head_scores</code></dt>
-<dd><code>torch.tensor</code> where the value at [i,j] is the score of the triple <code>(j, batch[i][1], batch[i][2])</code>. Shape <code>(batch_size, num_entities)</code></dd>
-<dt><code>tail_scores</code></dt>
-<dd><code>torch.tensor</code> where the value at [i,j] is the score of the triple <code>(batch[i][0], batch[i][1], j)</code>. Shape <code>(batch_size, num_entities)</code></dd>
+<dt><strong><code>batch_size</code></strong></dt>
+<dd>Size of a batch</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A tuple containing the number of batches and an iterable to the batches.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_test_batches(self, batch_size=100) -&gt; Tuple[int, Iterable[torch.Tensor]]:
+    &#34;&#34;&#34;Splits the test set into batches of fixed size
+
+    Args:
+        batch_size: Size of a batch
+    Returns:
+        A tuple containing the number of batches and an iterable to the batches.
+    &#34;&#34;&#34;
+    num_bat = int(np.ceil(len(self._testing) / batch_size))
+    return num_bat, cast(Iterable[torch.Tensor],
+                         split_list_in_batches_iter(input_list=self._testing, batch_size=batch_size))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="obl2021.OBL2021Evaluator"><code class="flex name class">
+<span>class <span class="ident">OBL2021Evaluator</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OBL2021Evaluator:
+
+    def eval(self, h_pred_top10, t_pred_top10, triples, save_submission=True):
+        &#34;&#34;&#34;
+        Evaluates ranked lists of head and tail entity predictions for a set of evaluation triples. By default creates a submission file.
+
+        Args:
+            h_pred_top10: Top 10 predictions for the head entity. The value at (i,j) is the ID of the predicted head entity with rank `j+1` for the triple `triples[i]`. Shape `(num_eval_triplets,10)`
+            t_pred_top10: Top 10 predictions for the tail entity. The value at (i,j) is the ID of the predicted tail entity with rank `j+1` for the triple `triples[i]`. Shape `(num_eval_triplets,10)`
+            triples: Set of evaluation triples. Shape `(num_eval_triplets,3)`
+            save_submission: If true a submission file is created. Default: True
+        &#34;&#34;&#34;
+
+        assert t_pred_top10.shape[1] == h_pred_top10.shape[1] == 10 and t_pred_top10.shape[0] == h_pred_top10.shape[
+            0] == triples.shape[0]
+
+        # h,r-&gt;t
+        t_pred_top10 = self._to_torch(t_pred_top10)
+        t_correct_index = self._to_torch(triples[:, 2])
+        h_pred_top10 = self._to_torch(h_pred_top10)
+        h_correct_index = self._to_torch(triples[:, 0])
+        pred_top10 = torch.cat((t_pred_top10, h_pred_top10), dim=0)
+        correct_index = torch.cat((t_correct_index, h_correct_index), dim=0)
+
+        h10 = self._calculate_h10(correct_index.to(pred_top10.device), pred_top10)
+        if save_submission is True:
+            self._save_test_submission(pred_top10)
+
+        print(&#34;Please copy also the following line in the respective field of the submission form:&#34;)
+        print({&#39;h10&#39;: h10})
+
+    def _to_torch(self, container):
+        if not isinstance(container, torch.Tensor):
+            container = torch.from_numpy(container)
+        return container
+
+    def _calculate_mrr(self, correct_index, pred_top10):
+        # extract indices where correct_index is within top10
+        tmp = torch.nonzero(correct_index.view(-1, 1) == pred_top10, as_tuple=False)
+
+        # reciprocal rank
+        # if rank is larger than 10, then set the reciprocal rank to 0.
+        rr = torch.zeros(len(correct_index)).to(tmp.device)
+        rr[tmp[:, 0]] = 1. / (tmp[:, 1].float() + 1.)
+
+        # mean reciprocal rank
+        return float(rr.mean().item())
+
+    def _calculate_h10(self, correct_index, pred_top10):
+        # extract indices where correct_index is within top10
+        total_h10 = torch.sum(torch.any(correct_index.view(-1, 1) == pred_top10, dim=1))
+
+        return float(total_h10 / correct_index.shape[0])
+
+    def _save_test_submission(self, pred_top10):
+
+        assert pred_top10.shape == (361928, 10)
+
+        if isinstance(pred_top10, torch.Tensor):
+            pred_top10 = pred_top10.cpu().numpy()
+        pred_top10 = pred_top10.astype(np.int32)
+
+        filename = os.path.abspath(&#39;pred_OBL2021&#39;)
+        np.savez_compressed(filename, pred_top10=pred_top10)
+        print(&#34;Submission file saved here: &#34; + filename)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="obl2021.OBL2021Evaluator.eval"><code class="name flex">
+<span>def <span class="ident">eval</span></span>(<span>self, h_pred_top10, t_pred_top10, triples, save_submission=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Evaluates ranked lists of head and tail entity predictions for a set of evaluation triples. By default creates a submission file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>h_pred_top10</code></strong></dt>
+<dd>Top 10 predictions for the head entity. The value at (i,j) is the ID of the predicted head entity with rank <code>j+1</code> for the triple <code>triples[i]</code>. Shape <code>(num_eval_triplets,10)</code></dd>
+<dt><strong><code>t_pred_top10</code></strong></dt>
+<dd>Top 10 predictions for the tail entity. The value at (i,j) is the ID of the predicted tail entity with rank <code>j+1</code> for the triple <code>triples[i]</code>. Shape <code>(num_eval_triplets,10)</code></dd>
+<dt><strong><code>triples</code></strong></dt>
+<dd>Set of evaluation triples. Shape <code>(num_eval_triplets,3)</code></dd>
+<dt><strong><code>save_submission</code></strong></dt>
+<dd>If true a submission file is created. Default: True</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-def score_batch(self, batch: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
-    &#34;&#34;&#34; .. important:: Abstract function, has to be implemented
-
-    Should return two arrays containing the head and tail scores of a batch of test data from a model.
+<pre><code class="python">def eval(self, h_pred_top10, t_pred_top10, triples, save_submission=True):
+    &#34;&#34;&#34;
+    Evaluates ranked lists of head and tail entity predictions for a set of evaluation triples. By default creates a submission file.
 
     Args:
-        batch: Batch of test data. Shape `(batch_size,3)`
-
-    Returns:
-        head_scores: `torch.tensor` where the value at [i,j] is the score of the triple `(j, batch[i][1], batch[i][2])`. Shape `(batch_size, num_entities)`
-        tail_scores: `torch.tensor` where the value at [i,j] is the score of the triple `(batch[i][0], batch[i][1], j)`. Shape `(batch_size, num_entities)`
+        h_pred_top10: Top 10 predictions for the head entity. The value at (i,j) is the ID of the predicted head entity with rank `j+1` for the triple `triples[i]`. Shape `(num_eval_triplets,10)`
+        t_pred_top10: Top 10 predictions for the tail entity. The value at (i,j) is the ID of the predicted tail entity with rank `j+1` for the triple `triples[i]`. Shape `(num_eval_triplets,10)`
+        triples: Set of evaluation triples. Shape `(num_eval_triplets,3)`
+        save_submission: If true a submission file is created. Default: True
     &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+
+    assert t_pred_top10.shape[1] == h_pred_top10.shape[1] == 10 and t_pred_top10.shape[0] == h_pred_top10.shape[
+        0] == triples.shape[0]
+
+    # h,r-&gt;t
+    t_pred_top10 = self._to_torch(t_pred_top10)
+    t_correct_index = self._to_torch(triples[:, 2])
+    h_pred_top10 = self._to_torch(h_pred_top10)
+    h_correct_index = self._to_torch(triples[:, 0])
+    pred_top10 = torch.cat((t_pred_top10, h_pred_top10), dim=0)
+    correct_index = torch.cat((t_correct_index, h_correct_index), dim=0)
+
+    h10 = self._calculate_h10(correct_index.to(pred_top10.device), pred_top10)
+    if save_submission is True:
+        self._save_test_submission(pred_top10)
+
+    print(&#34;Please copy also the following line in the respective field of the submission form:&#34;)
+    print({&#39;h10&#39;: h10})</code></pre>
 </details>
 </dd>
 </dl>
@@ -799,13 +773,14 @@ def score_batch(self, batch: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tenso
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="obl2021.MyEval" href="#obl2021.MyEval">MyEval</a></code></h4>
-</li>
-<li>
 <h4><code><a title="obl2021.OBL2021Dataset" href="#obl2021.OBL2021Dataset">OBL2021Dataset</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="obl2021.OBL2021Dataset.candidates" href="#obl2021.OBL2021Dataset.candidates">candidates</a></code></li>
+<li><code><a title="obl2021.OBL2021Dataset.filter_scores" href="#obl2021.OBL2021Dataset.filter_scores">filter_scores</a></code></li>
+<li><code><a title="obl2021.OBL2021Dataset.get_test_batches" href="#obl2021.OBL2021Dataset.get_test_batches">get_test_batches</a></code></li>
 <li><code><a title="obl2021.OBL2021Dataset.num_entities" href="#obl2021.OBL2021Dataset.num_entities">num_entities</a></code></li>
 <li><code><a title="obl2021.OBL2021Dataset.num_relations" href="#obl2021.OBL2021Dataset.num_relations">num_relations</a></code></li>
+<li><code><a title="obl2021.OBL2021Dataset.stats" href="#obl2021.OBL2021Dataset.stats">stats</a></code></li>
 <li><code><a title="obl2021.OBL2021Dataset.testing" href="#obl2021.OBL2021Dataset.testing">testing</a></code></li>
 <li><code><a title="obl2021.OBL2021Dataset.training" href="#obl2021.OBL2021Dataset.training">training</a></code></li>
 <li><code><a title="obl2021.OBL2021Dataset.validation" href="#obl2021.OBL2021Dataset.validation">validation</a></code></li>
@@ -814,8 +789,7 @@ def score_batch(self, batch: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tenso
 <li>
 <h4><code><a title="obl2021.OBL2021Evaluator" href="#obl2021.OBL2021Evaluator">OBL2021Evaluator</a></code></h4>
 <ul class="">
-<li><code><a title="obl2021.OBL2021Evaluator.evaluate" href="#obl2021.OBL2021Evaluator.evaluate">evaluate</a></code></li>
-<li><code><a title="obl2021.OBL2021Evaluator.score_batch" href="#obl2021.OBL2021Evaluator.score_batch">score_batch</a></code></li>
+<li><code><a title="obl2021.OBL2021Evaluator.eval" href="#obl2021.OBL2021Evaluator.eval">eval</a></code></li>
 </ul>
 </li>
 </ul>
