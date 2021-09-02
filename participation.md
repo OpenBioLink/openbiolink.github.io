@@ -13,12 +13,22 @@ Your team name will be made publicly available in our leaderboards together with
 
 ## Evaluation
 
-To evaluate a trained model for submission you have to use our provided evaluator `openbiolink.obl2021.OBL2021Evaluator`. The 
+To evaluate a trained model for submission you have to use our provided evaluator `openbiolink.obl2021.OBL2021Evaluator`, which evaluates a models prediction in a standardized way. A detailed documentation of it can be found [here](../obl2021.html#obl2021.OBL2021Evaluator).
 
+First you have to prepare:
++ `top10_heads`: torch.Tensor or numpy.array of shape (num_testing_triplets, 10)
+    *  Top 10 ranked predictions for the head entity. The value at (i,j) is the ID of the predicted head entity with rank `j+1` for the triple `dl.testing[i]`     
++ `top10_tails`: torch.Tensor or numpy.array of shape (num_testing_triplets, 10)
+    * Top 10 ranked predictions for the tail entity. The value at (i,j) is the ID of the predicted tail entity with rank `j+1` for the triple `dl.testing[i]`
 
-### Same score policy
+You can then run the evaluation by calling the evaluators `eval(...)` function with `top10_heads`, `top10_tails` and the set of test triples which can be retrieved from the Dataset module `dl.testing`. The `eval(...)` function creates a submission file in the location the script is started from and displays the calculated hits@10 metric which you also have to submit.
 
-You cannot treat positive scores different from negative scores. 
+{% highlight python %}
+from openbiolink.obl2021 import OBL2021Dataset, OBL2021Evaluator
+dl = OBL2021Dataset()
+ev = OBL2021Evaluator()
+ev.eval(top10_heads, top10_tails, dl.testing)
+{% endhighlight %}
 
 ## Minimal working example
 
