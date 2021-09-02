@@ -170,11 +170,28 @@
 
 <h2 id="evaluation">Evaluation</h2>
 
-<p>To evaluate a trained model for submission you have to use our provided evaluator <code class="language-plaintext highlighter-rouge">openbiolink.obl2021.OBL2021Evaluator</code>. The</p>
+<p>To evaluate a trained model for submission you have to use our provided evaluator <code class="language-plaintext highlighter-rouge">openbiolink.obl2021.OBL2021Evaluator</code>, which evaluates a models prediction in a standardized way. A detailed documentation of it can be found <a href="../obl2021.html#obl2021.OBL2021Evaluator">here</a>.</p>
 
-<h3 id="same-score-policy">Same score policy</h3>
+<p>First you have to prepare:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">top10_heads</code>: torch.Tensor or numpy.array of shape (num_testing_triplets, 10)
+    <ul>
+      <li>Top 10 ranked predictions for the head entity. The value at (i,j) is the ID of the predicted head entity with rank <code class="language-plaintext highlighter-rouge">j+1</code> for the triple <code class="language-plaintext highlighter-rouge">dl.testing[i]</code></li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">top10_tails</code>: torch.Tensor or numpy.array of shape (num_testing_triplets, 10)
+    <ul>
+      <li>Top 10 ranked predictions for the tail entity. The value at (i,j) is the ID of the predicted tail entity with rank <code class="language-plaintext highlighter-rouge">j+1</code> for the triple <code class="language-plaintext highlighter-rouge">dl.testing[i]</code></li>
+    </ul>
+  </li>
+</ul>
 
-<p>You cannot treat positive scores different from negative scores.</p>
+<p>You can then run the evaluation by calling the evaluators <code class="language-plaintext highlighter-rouge">eval(...)</code> function with <code class="language-plaintext highlighter-rouge">top10_heads</code>, <code class="language-plaintext highlighter-rouge">top10_tails</code> and the set of test triples which can be retrieved from the Dataset module <code class="language-plaintext highlighter-rouge">dl.testing</code>. The <code class="language-plaintext highlighter-rouge">eval(...)</code> function creates a submission file in the location the script is started from and displays the calculated hits@10 metric which you also have to submit.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">openbiolink.obl2021</span> <span class="kn">import</span> <span class="n">OBL2021Dataset</span><span class="p">,</span> <span class="n">OBL2021Evaluator</span>
+<span class="n">dl</span> <span class="o">=</span> <span class="n">OBL2021Dataset</span><span class="p">()</span>
+<span class="n">ev</span> <span class="o">=</span> <span class="n">OBL2021Evaluator</span><span class="p">()</span>
+<span class="n">ev</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="n">top10_heads</span><span class="p">,</span> <span class="n">top10_tails</span><span class="p">,</span> <span class="n">dl</span><span class="p">.</span><span class="n">testing</span><span class="p">)</span></code></pre></figure>
 
 <h2 id="minimal-working-example">Minimal working example</h2>
 
