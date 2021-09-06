@@ -13,6 +13,19 @@ Your team name will be made publicly available in our leaderboards together with
 
 ## Evaluation
 
+### Protocol and metric
+
+All models are evaluated using the hits@10 metric, which is formally defined in the following ([Citation](https://openreview.net/pdf?id=BkxSmlBFvr)). Let $$\mathcal{K}$$ be the set of all triples within the dataset, $$\mathcal{K}^{\text{test}}$$ be the set of test triples and $$\mathcal{E}$$ be the set of entities in $$\mathcal{K}$$. Given a triple $$(h, r, t)$$ of $$\mathcal{K}^{\text{test}}$$, the rank of $$(t \vert h,r)$$ is the filtered rank of object $t$, i.e. the rank of model score $$s(h,r,t)$$ among the collection of all pseudo-negative-object scores
+
+$$\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}$$
+
+If there are ties, we take the mean rank of all triples with score s(i,k,j). Define rank of $$(h \vert r,t)$$
+likewise. Then Hits@10 is calculated as:
+
+$$Hits@10 = \frac{1}{2* \vert \mathcal{\mathcal{K}^{\text{test}}} \vert} \sum_{(h,r,t) \in \mathcal{K}^{\text{test}}} \Big( 1(\text{rank}(t \vert h,r) \leq 10) + 1(\text{rank}(h \vert r,t) \leq 10 \Big)$$
+
+### Evaluator (Python package)
+
 To evaluate a trained model for submission you have to use our provided evaluator `openbiolink.obl2021.OBL2021Evaluator`, which evaluates a models prediction in a standardized way. A detailed documentation of it can be found [here](../obl2021.html#obl2021.OBL2021Evaluator).
 
 First you have to prepare:
@@ -49,15 +62,11 @@ class MockupModel:
         self.rng = default_rng(0)
 
     def getTop10Heads(self, batch):
-        rand = []
-        for i in range(batch.shape[0]):
-            rand.append(self.rng.choice(180992, 10, replace=False))
+        rand = [self.rng.choice(180992, 10, replace=False) for _ in range(batch.shape[0])]
         return torch.tensor(rand)
 
     def getTop10Tails(self, batch):
-        rand = []
-        for i in range(batch.shape[0]):
-            rand.append(self.rng.choice(180992, 10, replace=False))
+        rand = [self.rng.choice(180992, 10, replace=False) for _ in range(batch.shape[0])]
         return torch.tensor(rand)
 
 def main():

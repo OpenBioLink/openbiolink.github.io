@@ -41,6 +41,16 @@ The code of our embedding baseline models is located [here](https://github.com/n
 | RotatE         | 0.000   |              |
 | TransE         | 0.000   |              |
 
+# OpenBioLink Python Module
+
+We provide a python package for [loading](./dataset) the openbiolink dataset and [evaluating](./participation) your approach. To install the package:
+
+1. Install suitable [pytorch](https://pytorch.org/) version
+2. Install `openbiolink` package
+
+{% highlight bash %}
+pip install openbiolink==0.1.4
+{% endhighlight %}
 
 # Questions
 

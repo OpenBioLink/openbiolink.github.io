@@ -53,7 +53,7 @@ plugins:
 #   - vendor/ruby/
 
 logo_img: /assets/img/logo2021-transp.png
-copyright: This work received funding from <a id="simplex-logo" href="https://www.netidee.at" target="_blank"><img alt="Netidee logo" src="/assets/img/logo-netidee.svg"/></a> <span class="divider">·</span> © Simon Ott 2021 <span class="divider">·</span> <a href="/attributions.html">Icon attributions</a> #Your copyright.
+copyright: This work received funding from <a id="simplex-logo" href="https://www.netidee.at" target="_blank"><img alt="Netidee logo" src="/assets/img/logo-netidee.svg"/></a> <span class="divider">·</span> <a href="/attributions.html">Icon attributions</a> #Your copyright.
 
 collections:
     category:
