@@ -36,7 +36,7 @@ from typing import cast, Iterable, Tuple
 import numpy as np
 import pandas as pd
 import torch
-from pykeen.utils import split_list_in_batches_iter
+from openbiolink.utils import split_list_in_batches_iter
 from tqdm import tqdm
 
 from openbiolink.graph_creation.file_downloader import FileDownloader
@@ -95,7 +95,7 @@ class OBL2021Dataset(object):
         # check if exists
         if not path.isdir(self._dataset_path) or not os.listdir(self._dataset_path):
             print(
-                f&#34;Dataset not found in {os.path.abspath(self._dataset_path)}, downloading to {os.path.abspath(self._dataset_path)} ...&#34;)
+                f&#34;Dataset not found, downloading to {os.path.abspath(self._dataset_path)} ...&#34;)
             url = self._url
             filename = url.split(&#39;/&#39;)[-1]
             with tqdm(unit=&#39;B&#39;, unit_scale=True, unit_divisor=1024, miniters=1, desc=filename) as t:
@@ -254,7 +254,8 @@ class OBL2021Evaluator:
 
     def _save_test_submission(self, pred_top10):
 
-        assert pred_top10.shape == (361928, 10)
+        #assert (pred_top10.shape == (361928, 10)), &#34;Shape not (361928, 10) but &#34; + str(pred_top10.shape)
+        print(&#34;Shape not (361928, 10) but &#34; + str(pred_top10.shape))
 
         if isinstance(pred_top10, torch.Tensor):
             pred_top10 = pred_top10.cpu().numpy()
@@ -262,7 +263,7 @@ class OBL2021Evaluator:
 
         filename = os.path.abspath(&#39;pred_OBL2021&#39;)
         np.savez_compressed(filename, pred_top10=pred_top10)
-        print(&#34;Submission file saved here: &#34; + filename)</code></pre>
+        print(&#34;Submission file saved here: &#34; + filename + &#34;.npz&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -341,7 +342,7 @@ class OBL2021Evaluator:
         # check if exists
         if not path.isdir(self._dataset_path) or not os.listdir(self._dataset_path):
             print(
-                f&#34;Dataset not found in {os.path.abspath(self._dataset_path)}, downloading to {os.path.abspath(self._dataset_path)} ...&#34;)
+                f&#34;Dataset not found, downloading to {os.path.abspath(self._dataset_path)} ...&#34;)
             url = self._url
             filename = url.split(&#39;/&#39;)[-1]
             with tqdm(unit=&#39;B&#39;, unit_scale=True, unit_divisor=1024, miniters=1, desc=filename) as t:
@@ -697,7 +698,8 @@ positive triples.</p>
 
     def _save_test_submission(self, pred_top10):
 
-        assert pred_top10.shape == (361928, 10)
+        #assert (pred_top10.shape == (361928, 10)), &#34;Shape not (361928, 10) but &#34; + str(pred_top10.shape)
+        print(&#34;Shape not (361928, 10) but &#34; + str(pred_top10.shape))
 
         if isinstance(pred_top10, torch.Tensor):
             pred_top10 = pred_top10.cpu().numpy()
@@ -705,7 +707,7 @@ positive triples.</p>
 
         filename = os.path.abspath(&#39;pred_OBL2021&#39;)
         np.savez_compressed(filename, pred_top10=pred_top10)
-        print(&#34;Submission file saved here: &#34; + filename)</code></pre>
+        print(&#34;Submission file saved here: &#34; + filename + &#34;.npz&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
