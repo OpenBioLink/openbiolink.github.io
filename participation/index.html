@@ -170,6 +170,19 @@
 
 <h2 id="evaluation">Evaluation</h2>
 
+<h3 id="protocol-and-metric">Protocol and metric</h3>
+
+<p>All models are evaluated using the hits@10 metric, which is formally defined in the following (<a href="https://openreview.net/pdf?id=BkxSmlBFvr">Citation</a>). Let \(\mathcal{K}\) be the set of all triples within the dataset, \(\mathcal{K}^{\text{test}}\) be the set of test triples and \(\mathcal{E}\) be the set of entities in \(\mathcal{K}\). Given a triple \((h, r, t)\) of \(\mathcal{K}^{\text{test}}\), the rank of \((t \vert h,r)\) is the filtered rank of object $t$, i.e. the rank of model score \(s(h,r,t)\) among the collection of all pseudo-negative-object scores</p>
+
+\[\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}\]
+
+<p>If there are ties, we take the mean rank of all triples with score s(i,k,j). Define rank of \((h \vert r,t)\)
+likewise. Then Hits@10 is calculated as:</p>
+
+\[Hits@10 = \frac{1}{2* \vert \mathcal{\mathcal{K}^{\text{test}}} \vert} \sum_{(h,r,t) \in \mathcal{K}^{\text{test}}} \Big( 1(\text{rank}(t \vert h,r) \leq 10) + 1(\text{rank}(h \vert r,t) \leq 10 \Big)\]
+
+<h3 id="evaluator-python-package">Evaluator (Python package)</h3>
+
 <p>To evaluate a trained model for submission you have to use our provided evaluator <code class="language-plaintext highlighter-rouge">openbiolink.obl2021.OBL2021Evaluator</code>, which evaluates a models prediction in a standardized way. A detailed documentation of it can be found <a href="../obl2021.html#obl2021.OBL2021Evaluator">here</a>.</p>
 
 <p>First you have to prepare:</p>
@@ -210,15 +223,11 @@ Import of the OpenBioLink Dataset and Evaluator.
         <span class="bp">self</span><span class="p">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getTop10Heads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
-        <span class="n">rand</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="n">rand</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">180992</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+        <span class="n">rand</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">.</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">180992</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
         <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rand</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">getTop10Tails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
-        <span class="n">rand</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="n">rand</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">180992</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+        <span class="n">rand</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">.</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">180992</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
         <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rand</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
@@ -259,7 +268,7 @@ Please copy the following line <span class="k">in </span>the respective field of
     
     <footer class="footer">
         <section class="footer__about">
-                <p class="footer__about__copyright">This work received funding from <a id="simplex-logo" href="https://www.netidee.at" target="_blank"><img alt="Netidee logo" src="/assets/img/logo-netidee.svg"/></a> <span class="divider">·</span> © Simon Ott 2021 <span class="divider">·</span> <a href="/attributions.html">Icon attributions</a></p>
+                <p class="footer__about__copyright">This work received funding from <a id="simplex-logo" href="https://www.netidee.at" target="_blank"><img alt="Netidee logo" src="/assets/img/logo-netidee.svg"/></a> <span class="divider">·</span> <a href="/attributions.html">Icon attributions</a></p>
                 
                 <span class="divider">·</span>
                 
