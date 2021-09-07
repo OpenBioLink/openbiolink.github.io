@@ -33,13 +33,11 @@ The code of our embedding baseline models is located [here](https://github.com/n
 
 | Model          | Hits@10 | Explainable? |
 |----------------|---------|--------------|
-| AnyBURL        | 0.000   | X            |
-| RESCAL         | 0.000   |              |
-| TransR         | 0.000   |              |
-| DistMult       | 0.000   |              |
-| ComplEx        | 0.000   |              |
-| RotatE         | 0.000   |              |
-| TransE         | 0.000   |              |
+| DistMult       | 0.540   |              |
+| RotatE         | 0.526   |              |
+| ComplEX        | 0.524   |              |
+| AnyBURL        | 0.460   | X            |
+| TransE         | 0.449   |              |
 
 # OpenBioLink Python Module
 
