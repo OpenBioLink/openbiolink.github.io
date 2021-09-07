@@ -29,7 +29,7 @@ Best predictive performance prize can only be given to submissions that improve 
 
 # Baseline results
 
-The code of our embedding baseline models is located [here](https://github.com/nomisto/openbiolink-2021-embedding-baseline),  the code for our explainable baseline is located [here](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
+The code of our embedding baseline models is located [here](https://github.com/nomisto/openbiolink-2021-embedding-baseline), the code for our explainable baseline is located [here](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
 
 | Model          | Hits@10 | Explainable? |
 |----------------|---------|--------------|
@@ -43,8 +43,8 @@ The code of our embedding baseline models is located [here](https://github.com/n
 
 We provide a python package for [loading](./dataset) the openbiolink dataset and [evaluating](./participation) your approach. To install the package:
 
-1. Install suitable [pytorch](https://pytorch.org/) version
-2. Install `openbiolink` package
+1. Install [pytorch](https://pytorch.org/)
+2. Install the `openbiolink` package, (Version 0.1.4)
 
 {% highlight bash %}
 pip install openbiolink==0.1.4
