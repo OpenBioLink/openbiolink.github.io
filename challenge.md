@@ -34,10 +34,14 @@ The code of our embedding baseline models is located [here](https://github.com/n
 | Model          | Hits@10 | Explainable? |
 |----------------|---------|--------------|
 | DistMult       | 0.540   |              |
-| RotatE         | 0.526   |              |
-| ComplEX        | 0.524   |              |
+| RotatE         | 0.528   |              |
+| ComplEx        | 0.524   |              |
 | AnyBURL        | 0.460   | X            |
 | TransE         | 0.449   |              |
+| RESCAL*        | 0.284   |              |
+| TransR*        | 0.252   |              |
+
+*Models of the [dgl-ke](https://github.com/awslabs/dgl-ke) framework, which are under suspicion to be bugged, see this [issue](https://github.com/awslabs/dgl-ke/issues/225).
 
 # OpenBioLink Python Module
 
@@ -52,4 +56,4 @@ pip install openbiolink==0.1.4
 
 # Questions
 
-If you have any questions where you feel like others can profit from their answers, feel free to create a discussion on our [Github repository](https://github.com/OpenBioLink/OpenBioLink/discussions/categories/obl2021). For all other questions please write us an email at TBD.
+If you have any questions where you feel like others can profit from their answers, feel free to create a discussion on our [Github repository](https://github.com/OpenBioLink/OpenBioLink/discussions/categories/obl2021). For all other questions please write us an email at *simon.ott [at] meduniwien.ac.at*.
