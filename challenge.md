@@ -36,6 +36,7 @@ The code of our embedding baseline models is located [here](https://github.com/n
 | DistMult       | 0.540   |              |
 | RotatE         | 0.528   |              |
 | ComplEx        | 0.524   |              |
+| SAFRAN         | 0.485   | X            |
 | AnyBURL        | 0.460   | X            |
 | TransE         | 0.449   |              |
 | RESCAL*        | 0.284   |              |
