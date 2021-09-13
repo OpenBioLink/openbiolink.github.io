@@ -21,7 +21,7 @@ The code of all submissions have to be made public via a Github repository. It s
 
 All models are evaluated using the hits@10 metric, which is formally defined in the following ([Citation](https://openreview.net/pdf?id=BkxSmlBFvr)). Let $$\mathcal{K}$$ be the set of all triples within the dataset, $$\mathcal{K}^{\text{test}}$$ be the set of test triples and $$\mathcal{E}$$ be the set of entities in $$\mathcal{K}$$. Given a triple $$(h, r, t)$$ of $$\mathcal{K}^{\text{test}}$$, the rank of $$(t \vert h,r)$$ is the filtered rank of object $$t$$, i.e. the rank of model score $$s(h,r,t)$$ among the collection of all pseudo-negative-object scores
 
-$$\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}$$.
+$$\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}$$
 
 Define rank of $$(h \vert r,t)$$ likewise. Then Hits@10 is calculated as:
 
