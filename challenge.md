@@ -29,16 +29,16 @@ Best predictive performance prize can only be given to submissions that improve 
 
 The code of our embedding baseline models is located [here](https://github.com/nomisto/openbiolink-2021-embedding-baseline), the code for our explainable baseline is located [here](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
 
-| Model          | Hits@10 | Explainable? |
-|----------------|---------|--------------|
-| DistMult       | 0.542   |              |
-| RotatE         | 0.527   |              |
-| ComplEx        | 0.514   |              |
-| SAFRAN         | 0.507   | X            |
-| AnyBURL        | 0.463   | X            |
-| TransE         | 0.446   |              |
-| RESCAL*        | 0.408   |              |
-| TransR*        | 0.247   |              |
+| Model          | Hits@10 | Explainable? | Paper |
+|----------------|---------|--------------|-------|
+| DistMult       | 0.542   |              | (here)[https://arxiv.org/pdf/1412.6575.pdf] |
+| RotatE         | 0.527   |              | (here)[https://proceedings.mlr.press/v48/trouillon16.pdf] |
+| ComplEx        | 0.514   |              | (here)[https://openreview.net/pdf?id=HkgEQnRqYQ] |
+| SAFRAN         | 0.507   | X            | (here)[https://www.akbc.ws/2021/assets/pdfs/jCt9S_3w_S9.pdf] |
+| AnyBURL        | 0.463   | X            | (here)[https://arxiv.org/pdf/2004.04412.pdf] |
+| TransE         | 0.446   |              | (here)[https://papers.nips.cc/paper/2013/file/1cecc7a77928ca8133fa24680a88d2f9-Paper.pdf] |
+| RESCAL*        | 0.408   |              | (here)[https://icml.cc/2011/papers/438_icmlpaper.pdf] |
+| TransR*        | 0.247   |              | (here)[https://iie-liuyong.github.io/files/PCS-le.pdf] |
 
 *Models of the [dgl-ke](https://github.com/awslabs/dgl-ke) framework, which are under suspicion to be bugged, see this [issue](https://github.com/awslabs/dgl-ke/issues/225).
 
