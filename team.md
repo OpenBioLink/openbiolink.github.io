@@ -6,6 +6,6 @@ permalink: /team/
 
 # Team
 
-* Matthias Samwald
-* Adriano Barbosa da Silva
-* Simon Ott
+* Simon Ott, Institute of Artificial Intelligence, Medical University of Vienna, Vienna, Austria
+* Adriano Barbosa da Silva, Institute of Artificial Intelligence, Medical University of Vienna, Vienna, Austria
+* Matthias Samwald, Institute of Artificial Intelligence, Medical University of Vienna, Vienna, Austria
