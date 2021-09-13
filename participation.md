@@ -6,23 +6,28 @@ permalink: /participation/
 
 # Participation
 
-1. Register your Team: TBD Link to registration form
-2. Make your submission: TBD Link to submission form
+1. [Register your Team](https://forms.gle/nJZACsSN7RUQM7xM7)
+2. [Make your submissions](https://forms.gle/ucNpmMKVVUfgtGzj6)
+
+Please submit your approaches early, you can always overwrite your submission!
 
 Your team name will be made publicly available in our leaderboards together with your model performance. For the awardees of each dataset, the team member information will be also made publicly available.
+
+The code of all submissions have to be made public via a Github repository. It should include instructions on how to run the code (i.e. how to train a model, make hyperparameter search and evaluate it. Examples how we expect the repository to look like are our [Embedding baseline repository](https://github.com/nomisto/openbiolink-2021-embedding-baseline) and [Symbolic baseline repository](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
 
 ## Evaluation
 
 ### Protocol and metric
 
-All models are evaluated using the hits@10 metric, which is formally defined in the following ([Citation](https://openreview.net/pdf?id=BkxSmlBFvr)). Let $$\mathcal{K}$$ be the set of all triples within the dataset, $$\mathcal{K}^{\text{test}}$$ be the set of test triples and $$\mathcal{E}$$ be the set of entities in $$\mathcal{K}$$. Given a triple $$(h, r, t)$$ of $$\mathcal{K}^{\text{test}}$$, the rank of $$(t \vert h,r)$$ is the filtered rank of object $t$, i.e. the rank of model score $$s(h,r,t)$$ among the collection of all pseudo-negative-object scores
+All models are evaluated using the hits@10 metric, which is formally defined in the following ([Citation](https://openreview.net/pdf?id=BkxSmlBFvr)). Let $$\mathcal{K}$$ be the set of all triples within the dataset, $$\mathcal{K}^{\text{test}}$$ be the set of test triples and $$\mathcal{E}$$ be the set of entities in $$\mathcal{K}$$. Given a triple $$(h, r, t)$$ of $$\mathcal{K}^{\text{test}}$$, the rank of $$(t \vert h,r)$$ is the filtered rank of object $$t$$, i.e. the rank of model score $$s(h,r,t)$$ among the collection of all pseudo-negative-object scores
 
-$$\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}$$
+$$\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}$$.
 
-If there are ties, we take the mean rank of all triples with score s(i,k,j). Define rank of $$(h \vert r,t)$$
-likewise. Then Hits@10 is calculated as:
+Define rank of $$(h \vert r,t)$$ likewise. Then Hits@10 is calculated as:
 
 $$Hits@10 = \frac{1}{2* \vert \mathcal{\mathcal{K}^{\text{test}}} \vert} \sum_{(h,r,t) \in \mathcal{K}^{\text{test}}} \Big( 1(\text{rank}(t \vert h,r) \leq 10) + 1(\text{rank}(h \vert r,t) \leq 10 \Big)$$
+
+To avoid artificially boosting performances: The score of the positive triple $$s(h,r,t)$$ must not be treated differently than the scores of pseudo-negative triples. Thus every approach should generate the ranking of entities according to the *random* or *ordinal* policy for dealing with same score entities. (For further information see page 4 in [Knowledge Graph Embedding for Link Prediction: A Comparative Analysis; Rossi et al](https://export.arxiv.org/pdf/2002.00819)).
 
 ### Evaluator (Python package)
 

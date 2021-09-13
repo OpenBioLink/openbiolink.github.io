@@ -4,8 +4,6 @@ title: "OpenBioLink2021 Challenge"
 permalink: /
 ---
 
-**!!! This challenge has not started yet !!!**
-
 # Challenge
 
 To foster progress in link prediction on large-scale, heterogeneous biomedical data, we invite you to participate in the OpenBioLink Challenge. Link Prediction on knowledge graphs is a versatile paradigm for generating new insights about relationships between two entities. It is especially important in fields such as biomedical research, where it can help with hypothesis generation, prioritizing drug targets or therapeutic substances for experimental screening etc.
@@ -13,10 +11,10 @@ To foster progress in link prediction on large-scale, heterogeneous biomedical d
 # Timeline
 
 
-| Task                      |     Deadline              |               |
-|---------------------------|---------------------------|---------------|
-| Team registration         |            -              |  [Link](TBD)  |
-| Submission deadline       | 01.12.2021 - 23:59 GMT-0  |  [Link](TBD)  |
+| Task                      |     Deadline              |                                               |
+|---------------------------|---------------------------|-----------------------------------------------|
+| Team registration         |            -              |  [Link](https://forms.gle/nJZACsSN7RUQM7xM7)  |
+| Submission deadline       | 01.12.2021 - 23:59 GMT-0  |  [Link](https://forms.gle/ucNpmMKVVUfgtGzj6)  |
 
 There is no deadline for registering your team however, you'll need to register to OpenBioLink2021 before being able to make a submission.
 
@@ -33,14 +31,14 @@ The code of our embedding baseline models is located [here](https://github.com/n
 
 | Model          | Hits@10 | Explainable? |
 |----------------|---------|--------------|
-| DistMult       | 0.540   |              |
-| RotatE         | 0.528   |              |
-| ComplEx        | 0.524   |              |
-| SAFRAN         | 0.485   | X            |
-| AnyBURL        | 0.460   | X            |
-| TransE         | 0.449   |              |
-| RESCAL*        | 0.284   |              |
-| TransR*        | 0.252   |              |
+| DistMult       | 0.542   |              |
+| RotatE         | 0.527   |              |
+| ComplEx        | 0.514   |              |
+| SAFRAN         | 0.507   | X            |
+| AnyBURL        | 0.463   | X            |
+| TransE         | 0.446   |              |
+| RESCAL*        | 0.408   |              |
+| TransR*        | 0.247   |              |
 
 *Models of the [dgl-ke](https://github.com/awslabs/dgl-ke) framework, which are under suspicion to be bugged, see this [issue](https://github.com/awslabs/dgl-ke/issues/225).
 
