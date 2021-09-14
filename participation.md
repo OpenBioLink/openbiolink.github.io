@@ -11,9 +11,9 @@ permalink: /participation/
 
 Please submit your approaches early, you can always overwrite your submission!
 
-Your team name will be made publicly available in our leaderboards together with your model performance. For the awardees of each dataset, the team member information will be also made publicly available.
+Note that your team name will be made publicly available in our leaderboards together with your model performance. For the awardees of each dataset, the team member information will be also made publicly available.
 
-The code of all submissions have to be made public via a Github repository. It should include instructions on how to run the code (i.e. how to train a model, make hyperparameter search and evaluate it. Examples how we expect the repository to look like are our [embedding baseline repository](https://github.com/nomisto/openbiolink-2021-embedding-baseline) and [symbolic baseline repository](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
+The code of all submissions have to be made public via a Github repository. It should include instructions on how to run the code from beginning to end (i.e. how to train a model, make hyperparameter search and evaluate it) as we/the community will rerun the experiments of the awardees. **Everything should be reproducible**. Examples how we expect the repository to look like are our [embedding baseline repository](https://github.com/nomisto/openbiolink-2021-embedding-baseline) and [symbolic baseline repository](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
 
 ## Evaluation
 
