@@ -6,7 +6,7 @@ permalink: /
 
 # Challenge
 
-To foster progress in link prediction on large-scale, heterogeneous biomedical data, we invite you to participate in the OpenBioLink Challenge. Link Prediction on knowledge graphs is a versatile paradigm for generating new insights about relationships between two entities. It is especially important in fields such as biomedical research, where it can help with hypothesis generation, prioritizing drug targets or therapeutic substances for experimental screening etc.
+To foster progress in link prediction on large-scale, heterogeneous biomedical data, we invite you to participate in the OpenBioLink Challenge. Link Prediction on knowledge graphs is a versatile paradigm for generating new insights about relationships between entities. It is especially important in fields such as biomedical research, where it can help with hypothesis generation, prioritizing drug targets or therapeutic substances for experimental screening etc.
 
 # Timeline
 
@@ -20,10 +20,18 @@ There is no deadline for registering your team however, you'll need to register 
 
 # Prizes
 
-+ Best predictive performance prize (**750 €**)
-+ Best explainability prize (**250 €**)
++ Best predictive performance prize (**500 €**)
++ Best explainability prize (**500 €**)
 
-Best predictive performance prize can only be given to submissions that improve on current baseline results. Best explainability prize will be awarded based on evaluation by the OpenBioLink Challenge team. Furthermore, results of the challenge will be published in a joint paper on arXiv (and potentially a peer-reviewed journal). Challenge participants are of course free to also publish about their work in their own scientific papers.
+The **best predictive performance** prize will be awarded to the model with the best result in terms of predictive accuracy (measured with the Hits@10 metric). It can only be given to submissions that improve on current baseline results.
+
+The **best explainability prize** will be awarded to innovative models that provide good explanations for their predictions. Explainability is an important and still largely unaddressed issue in biomedical link prediction, and we want to foster the creation of explainable algorithms. The OpenBioLink challenge team will evaluate the quality of explanations and the innovativeness of the approach. Predictive performance is not a major criterion for winning the explainability prize, but it must exceed a Hits@10 value of 0.440.
+
+It is possible for a team to win both prizes, i.e. to be awarded 1000 € in total.
+
+Results of the challenge will be published in a joint paper on arXiv (and potentially a peer-reviewed journal), **including as co-authors members of all teams that made any submission** and who agree to be listed as co-authors. Even results of novel methods that do not improve upon the baseline results are expanding knowledge, and we welcome these submissions. 
+
+Challenge participants are of course free to also publish about their work in their own scientific publications.
 
 # Baseline results
 

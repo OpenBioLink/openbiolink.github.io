@@ -13,7 +13,7 @@ Please submit your approaches early, you can always overwrite your submission!
 
 Note that your team name will be made publicly available in our leaderboards together with your model performance. For the awardees of each dataset, the team member information will be also made publicly available.
 
-The code of all submissions have to be made public via a Github repository. It should include instructions on how to run the code from beginning to end (i.e. how to train a model, make hyperparameter search and evaluate it) as we/the community will rerun the experiments of the awardees. **Everything should be reproducible**. Examples how we expect the repository to look like are our [embedding baseline repository](https://github.com/nomisto/openbiolink-2021-embedding-baseline) and [symbolic baseline repository](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
+The code of all submissions has to be made public via a Github repository. It should include instructions on how to run the code from beginning to end (i.e. how to train a model, make hyperparameter searches and evaluate it) as we/the community will rerun the experiments of the awardees. **Everything should be reproducible**. Examples how we expect the repository to look like are our [embedding baseline repository](https://github.com/nomisto/openbiolink-2021-embedding-baseline) and [symbolic baseline repository](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
 
 ## Evaluation
 
@@ -50,7 +50,7 @@ ev.eval(top10_heads, top10_tails, dl.testing)
 
 ## Minimal working example
 
-Following code produces the score and the file needed for submission. The file is generated in the location from where the script is started. For the submission you need to copy and paste the line that starts with `{'h10': ...` to the submission form.
+The following code produces the score and the file needed for submission. The file is generated in the location from where the script is started. For the submission you need to copy and paste the line that starts with `{'h10': ...` to the submission form.
 
 {% highlight python %}
 
@@ -69,7 +69,7 @@ class MockupModel:
     def getTop10Heads(self, batch):
         rand = [self.rng.choice(180992, 10, replace=False) for _ in range(batch.shape[0])]
         return torch.tensor(rand)
-
+    
     def getTop10Tails(self, batch):
         rand = [self.rng.choice(180992, 10, replace=False) for _ in range(batch.shape[0])]
         return torch.tensor(rand)
@@ -81,17 +81,17 @@ def main():
     # Initialize dataset and evaluator
     dl = OBL2021Dataset()
     ev = OBL2021Evaluator()
-
+    
     top10_heads = []
     top10_tails = []
-
+    
     n_batches, batches = dl.get_test_batches(100)
     for batch in tqdm(batches, total=n_batches):
         top10_tails.append(model.getTop10Heads(batch))
         top10_heads.append(model.getTop10Tails(batch))
     top10_heads = torch.cat(top10_heads, dim=0)
     top10_tails = torch.cat(top10_tails, dim=0)
-
+    
     ev.eval(top10_heads, top10_tails, dl.testing)
 
 if __name__ == "__main__":

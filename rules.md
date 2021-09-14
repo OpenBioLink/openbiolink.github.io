@@ -6,7 +6,7 @@ permalink: /rules/
 
 # Rules
 
-We are aware that our test set is publicly available. However we strongly adivse against cheating of any kind (usage of external data, hyperparameter searches on the test set, ...) as we will examine the public repository of the awardees very thoroughly. **Any detected misconduct of an awardee team will result in disqualification from the competition**.
+Our test set is publicly available, which makes it theoretically possible to cheat (e.g. through usage of external data that is not part of the OpenBioLink dataset, hyperparameter searches on the test set, ...). While we hope that teams will act ethically and will not attempt to cheat, we will examine the public repository of potential awardees very thoroughly. **Any detected misconduct of an awardee team will result in disqualification from the competition**.
 
 + We only accept submissions that are fully reproducible (including any Hyperparameter searches).
 + The code repositories of all submissions have to be made public.
