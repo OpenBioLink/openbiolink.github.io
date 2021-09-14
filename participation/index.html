@@ -172,7 +172,7 @@
 
 <p>Note that your team name will be made publicly available in our leaderboards together with your model performance. For the awardees of each dataset, the team member information will be also made publicly available.</p>
 
-<p>The code of all submissions have to be made public via a Github repository. It should include instructions on how to run the code from beginning to end (i.e. how to train a model, make hyperparameter search and evaluate it) as we/the community will rerun the experiments of the awardees. <strong>Everything should be reproducible</strong>. Examples how we expect the repository to look like are our <a href="https://github.com/nomisto/openbiolink-2021-embedding-baseline">embedding baseline repository</a> and <a href="https://github.com/nomisto/openbiolink-2021-symbolic-baseline">symbolic baseline repository</a>.</p>
+<p>The code of all submissions has to be made public via a Github repository. It should include instructions on how to run the code from beginning to end (i.e. how to train a model, make hyperparameter searches and evaluate it) as we/the community will rerun the experiments of the awardees. <strong>Everything should be reproducible</strong>. Examples how we expect the repository to look like are our <a href="https://github.com/nomisto/openbiolink-2021-embedding-baseline">embedding baseline repository</a> and <a href="https://github.com/nomisto/openbiolink-2021-symbolic-baseline">symbolic baseline repository</a>.</p>
 
 <h2 id="evaluation">Evaluation</h2>
 
@@ -215,7 +215,7 @@
 
 <h2 id="minimal-working-example">Minimal working example</h2>
 
-<p>Following code produces the score and the file needed for submission. The file is generated in the location from where the script is started. For the submission you need to copy and paste the line that starts with <code class="language-plaintext highlighter-rouge">{'h10': ...</code> to the submission form.</p>
+<p>The following code produces the score and the file needed for submission. The file is generated in the location from where the script is started. For the submission you need to copy and paste the line that starts with <code class="language-plaintext highlighter-rouge">{'h10': ...</code> to the submission form.</p>
 
 <figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">"""
 Import of the OpenBioLink Dataset and Evaluator.
@@ -232,7 +232,7 @@ Import of the OpenBioLink Dataset and Evaluator.
     <span class="k">def</span> <span class="nf">getTop10Heads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
         <span class="n">rand</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">.</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">180992</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
         <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rand</span><span class="p">)</span>
-
+    
     <span class="k">def</span> <span class="nf">getTop10Tails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
         <span class="n">rand</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">.</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">180992</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
         <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rand</span><span class="p">)</span>
@@ -244,17 +244,17 @@ Import of the OpenBioLink Dataset and Evaluator.
     <span class="c1"># Initialize dataset and evaluator
 </span>    <span class="n">dl</span> <span class="o">=</span> <span class="n">OBL2021Dataset</span><span class="p">()</span>
     <span class="n">ev</span> <span class="o">=</span> <span class="n">OBL2021Evaluator</span><span class="p">()</span>
-
+    
     <span class="n">top10_heads</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">top10_tails</span> <span class="o">=</span> <span class="p">[]</span>
-
+    
     <span class="n">n_batches</span><span class="p">,</span> <span class="n">batches</span> <span class="o">=</span> <span class="n">dl</span><span class="p">.</span><span class="n">get_test_batches</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">n_batches</span><span class="p">):</span>
         <span class="n">top10_tails</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">getTop10Heads</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
         <span class="n">top10_heads</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">getTop10Tails</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
     <span class="n">top10_heads</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">(</span><span class="n">top10_heads</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">top10_tails</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">(</span><span class="n">top10_tails</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
+    
     <span class="n">ev</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="n">top10_heads</span><span class="p">,</span> <span class="n">top10_tails</span><span class="p">,</span> <span class="n">dl</span><span class="p">.</span><span class="n">testing</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
