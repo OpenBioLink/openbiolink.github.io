@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Rules"
+title: "OpenBioLink2021 Challenge"
 permalink: /rules/
 ---
 

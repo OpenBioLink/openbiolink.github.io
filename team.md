@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Team"
+title: "OpenBioLink2021 Challenge"
 permalink: /team/
 ---
 

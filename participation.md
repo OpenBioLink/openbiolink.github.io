@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Participation"
+title: "OpenBioLink2021 Challenge"
 permalink: /participation/
 ---
 

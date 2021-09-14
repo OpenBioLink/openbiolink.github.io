@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Dataset"
+title: "OpenBioLink2021 Challenge"
 permalink: /dataset/
 ---
 
