@@ -16,7 +16,7 @@ To foster progress in link prediction on large-scale, heterogeneous biomedical d
 | Team registration         |            -              |  [Link](https://forms.gle/nJZACsSN7RUQM7xM7)  |
 | Submission deadline       | 01.12.2021 - 23:59 GMT-0  |  [Link](https://forms.gle/ucNpmMKVVUfgtGzj6)  |
 
-There is no deadline for registering your team however, you'll need to register to OpenBioLink2021 before being able to make a submission.
+There is no deadline for registering your team, but we urge you to register as soon as possible so you can receive updates from us. You need to register your team before making a submission.
 
 # Prizes
 
