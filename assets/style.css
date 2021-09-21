@@ -204,9 +204,13 @@ table:not([class]) th, table:not([class]) td { padding: .25rem; border: 1px soli
 
 .sx-picture { display: flex; flex-direction: column; align-items: center; justify-content: center; width: fit-content; margin: 1.5rem 0; }
 
-.header { display: flex; align-items: center; justify-content: center; flex-direction: row; flex-direction: column; padding-top: 2rem; padding-bottom: 2rem; position: relative; width: 100%; }
+.header { display: flex; align-items: center; justify-content: center; flex-direction: row; flex-direction: column; padding-top: 2rem; position: relative; width: 100%; }
 
 @media (max-width: 768px) { .header { background-color: #e6e6e6; } }
+
+@media (min-width: 768px) { .header { padding-bottom: 2rem; } }
+
+@media (max-width: 768px) { .header { padding-bottom: 0.5rem; } }
 
 .header .logo__link { text-decoration: none; color: var(--c-themePrimaryDark); transition: ease 0.5s; }
 
@@ -216,7 +220,7 @@ table:not([class]) th, table:not([class]) td { padding: .25rem; border: 1px soli
 
 @media (min-width: 768px) { .header .logo { margin-bottom: 2rem; } }
 
-.header #menuToggle { display: none; border: none; outline: none; cursor: pointer; margin: 2rem 0 1rem 0; padding: 0; font-size: 1rem; width: 3em; background-color: transparent; }
+.header #menuToggle { display: none; border: none; outline: none; cursor: pointer; margin: 0.75rem 0 0.5rem 0; padding: 0; font-size: 1rem; width: 3em; background-color: transparent; }
 
 @media (max-width: 768px) { .header #menuToggle { display: block; } }
 
@@ -424,16 +428,14 @@ table:not([class]) th, table:not([class]) td { padding: .25rem; border: 1px soli
 
 .page figure { margin-left: auto; margin-right: auto; margin-top: 0px; margin-bottom: 0px; }
 
-.page table { margin-left: auto; margin-right: auto; }
-
 .page h1 { margin-right: auto; margin-bottom: 0px; }
 
 .page h2 { margin-right: auto; margin-bottom: 0px; }
 
 .page h3 { margin-right: auto; margin-bottom: 0px; }
 
-.page .formula-wrapper { width: calc(100vw - 2rem); overflow-x: auto; }
+.page .formula-wrapper { max-width: calc(100vw - 2rem); overflow-x: auto; margin-left: auto; margin-right: auto; }
 
-.page .table-wrapper { width: calc(100vw - 2rem); overflow-x: auto; }
+.page .table-wrapper { max-width: calc(100vw - 2rem); overflow-x: auto; margin-left: auto; margin-right: auto; }
 
 /*# sourceMappingURL=style.css.map */
