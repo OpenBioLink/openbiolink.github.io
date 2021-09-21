@@ -418,7 +418,7 @@ table:not([class]) th, table:not([class]) td { padding: .25rem; border: 1px soli
 
 .post__navigator__buttons a .arrow-right { margin-left: .5rem; height: 1em; }
 
-.page { width: 100%; background: inherit; color: var(--c-pageText); justify-self: center; padding: 0 2rem; max-width: 1000px; display: flex; align-items: center; justify-content: center; flex-direction: row; flex-direction: column; justify-content: flex-start; align-items: flex-start; }
+.page { width: 100%; background: inherit; color: var(--c-pageText); justify-self: center; padding: 0 1rem; max-width: 1000px; display: flex; align-items: center; justify-content: center; flex-direction: row; flex-direction: column; justify-content: flex-start; align-items: flex-start; }
 
 .page img { max-width: 100%; }
 
@@ -431,5 +431,9 @@ table:not([class]) th, table:not([class]) td { padding: .25rem; border: 1px soli
 .page h2 { margin-right: auto; margin-bottom: 0px; }
 
 .page h3 { margin-right: auto; margin-bottom: 0px; }
+
+.page .formula-wrapper { width: calc(100vw - 2rem); overflow-x: auto; }
+
+.page .table-wrapper { width: calc(100vw - 2rem); overflow-x: auto; }
 
 /*# sourceMappingURL=style.css.map */

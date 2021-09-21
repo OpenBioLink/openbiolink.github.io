@@ -180,11 +180,19 @@
 
 <p>All models are evaluated using the hits@10 metric, which is formally defined in the following. Let \(\mathcal{K}\) be the set of all triples within the dataset, \(\mathcal{K}^{\text{test}}\) be the set of test triples and \(\mathcal{E}\) be the set of entities in \(\mathcal{K}\). Given a triple \((h, r, t)\) of \(\mathcal{K}^{\text{test}}\), the rank of \((t \vert h,r)\) is the filtered rank of object \(t\), i.e. the rank of model score \(s(h,r,t)\) among the collection of all pseudo-negative-object scores</p>
 
+<div class="formula-wrapper">
+
 \[\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}\]
+
+</div>
 
 <p>Define rank of \((h \vert r,t)\) likewise. Then Hits@10 is calculated as:</p>
 
+<div class="formula-wrapper">
+
 \[Hits@10 = \frac{1}{2* \vert \mathcal{\mathcal{K}^{\text{test}}} \vert} \sum_{(h,r,t) \in \mathcal{K}^{\text{test}}} \Big( 1(\text{rank}(t \vert h,r) \leq 10) + 1(\text{rank}(h \vert r,t) \leq 10 \Big)\]
+
+</div>
 
 <p>To avoid artificially boosting performances: The score of the positive triple \(s(h,r,t)\) must not be treated differently than the scores of pseudo-negative triples. Thus every approach should generate the ranking of entities according to the <em>random</em> or <em>ordinal</em> policy for dealing with same score entities. (For further information see page 4 in <a href="https://export.arxiv.org/pdf/2002.00819">Knowledge Graph Embedding for Link Prediction: A Comparative Analysis; Rossi et al</a>).</p>
 
