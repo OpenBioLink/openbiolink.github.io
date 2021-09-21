@@ -10,11 +10,14 @@ To foster progress in link prediction on large-scale, heterogeneous biomedical d
 
 # Timeline
 
+<div class="table-wrapper" markdown="block">
 
 | Task                      |     Deadline              |                                               |
 |---------------------------|---------------------------|-----------------------------------------------|
 | Team registration         |            -              |  [Link](https://forms.gle/nJZACsSN7RUQM7xM7)  |
 | Submission deadline       | 01.12.2021 - 23:59 GMT-0  |  [Link](https://forms.gle/ucNpmMKVVUfgtGzj6)  |
+
+</div>
 
 There is no deadline for registering your team however, you'll need to register to OpenBioLink2021 before being able to make a submission.
 
@@ -37,6 +40,8 @@ Challenge participants are of course free to also publish about their work in th
 
 The code of our embedding baseline models is located [here](https://github.com/nomisto/openbiolink-2021-embedding-baseline), the code for our explainable baseline is located [here](https://github.com/nomisto/openbiolink-2021-symbolic-baseline).
 
+<div class="table-wrapper" markdown="block">
+
 | Model          | Hits@10 | Explainable? | Paper |
 |----------------|---------|--------------|-------|
 | DistMult       | 0.542   |              | [here](https://arxiv.org/pdf/1412.6575.pdf) |
@@ -47,6 +52,8 @@ The code of our embedding baseline models is located [here](https://github.com/n
 | TransE         | 0.446   |              | [here](https://papers.nips.cc/paper/2013/file/1cecc7a77928ca8133fa24680a88d2f9-Paper.pdf) |
 | RESCAL*        | 0.408   |              | [here](https://icml.cc/2011/papers/438_icmlpaper.pdf) |
 | TransR*        | 0.247   |              | [here](https://iie-liuyong.github.io/files/PCS-le.pdf) |
+
+</div>
 
 *Models of the [dgl-ke](https://github.com/awslabs/dgl-ke) framework, which are under suspicion to be bugged, see this [issue](https://github.com/awslabs/dgl-ke/issues/225).
 
