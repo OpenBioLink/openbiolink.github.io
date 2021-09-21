@@ -16,7 +16,7 @@ The OpenBioLink2021 Dataset is a highly challenging benchmark dataset containing
 
 </div>
 
-The dataset can be downloaded from [https://zenodo.org/record/5361324/files/KGID_HQ_DIR.zip](https://zenodo.org/record/5361324/files/KGID_HQ_DIR.zip?download=1) or loaded with the provided python dataloader module, which is further documented [here](../obl2021.html#obl2021.OBL2021Dataset). Please make sure that you get the dataset from one of the two sources, as other versions of OpenBioLink may differ. 
+The dataset can be downloaded from Zenodo: [KGID_HQ_DIR.zip](https://zenodo.org/record/5361324/files/KGID_HQ_DIR.zip?download=1) or loaded with the provided python dataloader module, which is further documented [here](../obl2021.html#obl2021.OBL2021Dataset). Please make sure that you get the dataset from one of the two sources, as other versions of OpenBioLink may differ. 
 
 {% highlight python %}
 

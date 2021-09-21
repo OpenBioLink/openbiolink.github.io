@@ -39,7 +39,7 @@ To avoid artificially boosting performances: The score of the positive triple $$
 
 ### Evaluator (Python package)
 
-To evaluate a trained model for submission you have to use our provided evaluator `openbiolink.obl2021.OBL2021Evaluator`, which evaluates a models prediction in a standardized way. A detailed documentation of it can be found [here](../obl2021.html#obl2021.OBL2021Evaluator).
+To create a submission for a model our provided evaluator `OBL2021Evaluator` has to be used, which evaluates predictions in a standardized way. A detailed documentation of it can be found [here](../obl2021.html#obl2021.OBL2021Evaluator).
 
 First you have to prepare:
 + `top10_heads`: torch.Tensor or numpy.array of shape (num_testing_triplets, 10)
