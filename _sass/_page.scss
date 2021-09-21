@@ -26,11 +26,6 @@
         margin-top: 0px;
         margin-bottom: 0px;
     }
-
-    table{
-        margin-left: auto;
-        margin-right: auto;
-    }
     
     h1{
         margin-right:auto;
@@ -46,12 +41,16 @@
     }
 
     .formula-wrapper{
-        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
         overflow-x: auto;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .table-wrapper{
-        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
         overflow-x: auto;
+        margin-left: auto;
+        margin-right: auto;
     }
 }
