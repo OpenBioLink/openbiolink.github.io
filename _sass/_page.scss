@@ -8,7 +8,7 @@
 	background: inherit;
     color: var(--c-pageText);
     justify-self: center;
-    margin: 0 2rem;
+    padding: 0 1rem;
     max-width: 1000px;
     @include flexbox{
         flex-direction: column;
@@ -26,11 +26,6 @@
         margin-top: 0px;
         margin-bottom: 0px;
     }
-
-    table{
-        margin-left: auto;
-        margin-right: auto;
-    }
     
     h1{
         margin-right:auto;
@@ -43,5 +38,19 @@
     h3{
         margin-right:auto;
         margin-bottom: 0px;
+    }
+
+    .formula-wrapper{
+        max-width: calc(100vw - 2rem);
+        overflow-x: auto;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .table-wrapper{
+        max-width: calc(100vw - 2rem);
+        overflow-x: auto;
+        margin-left: auto;
+        margin-right: auto;
     }
 }

@@ -4,7 +4,7 @@ title: "OpenBioLink2021 Challenge"
 permalink: /team/
 ---
 
-# Team
+# 👨‍🔬 Team
 
 * **Simon Ott**, Institute of Artificial Intelligence, Medical University of Vienna, Vienna, Austria
 * **Adriano Barbosa da Silva**, Institute of Artificial Intelligence, Medical University of Vienna, Vienna, Austria

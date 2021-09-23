@@ -9,8 +9,17 @@
         flex-direction: column;
     };
 
+    @include for-size('tablet'){
+        background-color: #e6e6e6;
+    }
+
     padding-top: 2rem;
-	padding-bottom: 2rem;
+    @include for-size('tablet-up'){
+        padding-bottom: 2rem;
+    }
+    @include for-size('tablet'){
+        padding-bottom: 0.5rem;
+    }
     position:relative;
     width:100%;
     .logo{
@@ -26,11 +35,14 @@
             }
             &__img{
                 filter: var(--c-headerImageFilter);
-                height: 9rem;
+                max-height: 9rem;
+                max-width: 90vw;
             }
         }
-        
-        margin-bottom: 2rem;
+
+        @include for-size('tablet-up'){
+            margin-bottom: 2rem;
+        }
     }
 
     #menuToggle{
@@ -39,10 +51,11 @@
         outline: none;
         cursor: pointer;
         
-        margin: 2rem 0 1rem 0;
+        margin: 0.75rem 0 0.5rem 0;
         padding: 0;
         font-size: 1rem;
-        width: 3em;
+        width: 3em;        
+        background-color: transparent;
 
         @include for-size('tablet'){
             display: block;
@@ -313,5 +326,9 @@
         top: 0px;
         z-index: -1;
         background:#e6e6e6;
+
+        @include for-size('tablet'){
+            display: none;
+        }
     }
 }

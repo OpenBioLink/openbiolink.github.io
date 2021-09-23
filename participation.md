@@ -4,7 +4,7 @@ title: "OpenBioLink2021 Challenge"
 permalink: /participation/
 ---
 
-# Participation
+# 🚀 Participation
 
 1. [Register your Team](https://forms.gle/nJZACsSN7RUQM7xM7)
 2. [Make your submissions](https://forms.gle/ucNpmMKVVUfgtGzj6)
@@ -21,17 +21,25 @@ The code of all submissions has to be made public via a Github repository. It sh
 
 All models are evaluated using the hits@10 metric, which is formally defined in the following. Let $$\mathcal{K}$$ be the set of all triples within the dataset, $$\mathcal{K}^{\text{test}}$$ be the set of test triples and $$\mathcal{E}$$ be the set of entities in $$\mathcal{K}$$. Given a triple $$(h, r, t)$$ of $$\mathcal{K}^{\text{test}}$$, the rank of $$(t \vert h,r)$$ is the filtered rank of object $$t$$, i.e. the rank of model score $$s(h,r,t)$$ among the collection of all pseudo-negative-object scores
 
+<div class="formula-wrapper" markdown="block">
+
 $$\{s(h,r,t'): t' \in \mathcal{E} \:\text{and}\: (h,r,t') \notin \mathcal{K}\}$$
+
+</div>
 
 Define rank of $$(h \vert r,t)$$ likewise. Then Hits@10 is calculated as:
 
+<div class="formula-wrapper" markdown="block">
+
 $$Hits@10 = \frac{1}{2* \vert \mathcal{\mathcal{K}^{\text{test}}} \vert} \sum_{(h,r,t) \in \mathcal{K}^{\text{test}}} \Big( 1(\text{rank}(t \vert h,r) \leq 10) + 1(\text{rank}(h \vert r,t) \leq 10 \Big)$$
+
+</div>
 
 To avoid artificially boosting performances: The score of the positive triple $$s(h,r,t)$$ must not be treated differently than the scores of pseudo-negative triples. Thus every approach should generate the ranking of entities according to the *random* or *ordinal* policy for dealing with same score entities. (For further information see page 4 in [Knowledge Graph Embedding for Link Prediction: A Comparative Analysis; Rossi et al](https://export.arxiv.org/pdf/2002.00819)).
 
 ### Evaluator (Python package)
 
-To evaluate a trained model for submission you have to use our provided evaluator `openbiolink.obl2021.OBL2021Evaluator`, which evaluates a models prediction in a standardized way. A detailed documentation of it can be found [here](../obl2021.html#obl2021.OBL2021Evaluator).
+To create a submission for a model our provided evaluator `OBL2021Evaluator` has to be used, which evaluates predictions in a standardized way. A detailed documentation of it can be found [here](../obl2021.html#obl2021.OBL2021Evaluator).
 
 First you have to prepare:
 + `top10_heads`: torch.Tensor or numpy.array of shape (num_testing_triplets, 10)
