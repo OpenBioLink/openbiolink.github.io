@@ -4,7 +4,7 @@ title: "OpenBioLink2021 Challenge"
 permalink: /
 ---
 
-# 🏔️ Challenge
+# ⛰️ Challenge
 
  To foster progress in link prediction on large-scale, heterogeneous biomedical data, we invite you to participate in the OpenBioLink Challenge. Link Prediction on knowledge graphs is a versatile paradigm for generating new insights about relationships between entities. It is especially important in fields such as biomedical research, where it can help with hypothesis generation, prioritizing drug targets or therapeutic substances for experimental screening etc.
 
@@ -57,7 +57,7 @@ The code of our embedding baseline models is located [here](https://github.com/n
 
 *Models of the [dgl-ke](https://github.com/awslabs/dgl-ke) framework, which are under suspicion to be bugged, see this [issue](https://github.com/awslabs/dgl-ke/issues/225).
 
-## 🧰 OpenBioLink Python Module
+## 🛠️ OpenBioLink Python Module
 
 We provide a python package for [loading](./dataset) the openbiolink dataset and [evaluating](./participation) your approach. To install the package:
 
