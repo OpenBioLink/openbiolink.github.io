@@ -4,7 +4,7 @@ title: "OpenBioLink2021 Challenge"
 permalink: /participation/
 ---
 
-# Participation
+# 🚀 Participation
 
 1. [Register your Team](https://forms.gle/nJZACsSN7RUQM7xM7)
 2. [Make your submissions](https://forms.gle/ucNpmMKVVUfgtGzj6)

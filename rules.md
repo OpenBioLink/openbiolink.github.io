@@ -4,7 +4,7 @@ title: "OpenBioLink2021 Challenge"
 permalink: /rules/
 ---
 
-# Rules
+# 📜 Rules
 
 Our test set is publicly available, which makes it theoretically possible to cheat (e.g. through usage of external data that is not part of the OpenBioLink dataset, hyperparameter searches on the test set, ...). While we hope that teams will act ethically and will not attempt to cheat, we will examine the public repository of potential awardees very thoroughly. **Any detected misconduct of an awardee team will result in disqualification from the competition**.
 
