@@ -71,3 +71,5 @@ pip install openbiolink==0.1.4
 ## 🙋 Questions
 
 If you have any questions where you feel like others can profit from their answers, feel free to create a discussion on our [Github repository](https://github.com/OpenBioLink/OpenBioLink/discussions/categories/obl2021). For all other questions please write us an email at *simon.ott [at] meduniwien.ac.at*.
+
+The challenge is based on the OpenBioLink benchmark, first described in: Anna Breit, Simon Ott, Asan Agibetov and Matthias Samwald. **„OpenBioLink: A benchmarking framework for large-scale biomedical link prediction“**. *Bioinformatics* 36, Nr. 13 (July 2020): 4097–98. https://doi.org/10.1093/bioinformatics/btaa274.
