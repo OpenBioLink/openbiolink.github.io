@@ -176,6 +176,18 @@
 
 <h2 id="evaluation">Evaluation</h2>
 
+<div style="margin-top:1rem;">
+
+  <table>
+    <tbody>
+      <tr>
+        <td>⚠️ For approaches that rely heavily on random number generators (such as most embedding approaches) we require <strong>three submissions</strong>: for each submission the model should be trained with a different random state (seed). All three models have to be trained with the same hyperparameters (if any).</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
 <h3 id="protocol-and-metric">Protocol and metric</h3>
 
 <p>All models are evaluated using the hits@10 metric, which is formally defined in the following. Let \(\mathcal{K}\) be the set of all triples within the dataset, \(\mathcal{K}^{\text{test}}\) be the set of test triples and \(\mathcal{E}\) be the set of entities in \(\mathcal{K}\). Given a triple \((h, r, t)\) of \(\mathcal{K}^{\text{test}}\), the rank of \((t \vert h,r)\) is the filtered rank of object \(t\), i.e. the rank of model score \(s(h,r,t)\) among the collection of all pseudo-negative-object scores</p>
@@ -195,6 +207,27 @@
 </div>
 
 <p>To avoid artificially boosting performances: The score of the positive triple \(s(h,r,t)\) must not be treated differently than the scores of pseudo-negative triples. Thus every approach should generate the ranking of entities according to the <em>random</em> or <em>ordinal</em> policy for dealing with same score entities. (For further information see page 4 in <a href="https://export.arxiv.org/pdf/2002.00819">Knowledge Graph Embedding for Link Prediction: A Comparative Analysis; Rossi et al</a>).</p>
+
+<table style="width:100%;">
+  <thead>
+    <tr>
+      <td align="left" style="border-bottom:none;">
+        ⚠️ Two major things to take away here:
+      </td>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td style="border-top:none;">
+        <ul style="margin:0px;">
+          <li>The number of negative evaluation triples is equal to number of entities in the dataset (Corruption with all entities)</li>
+          <li>Do not use <i>top</i> policy (Inserting the correct entity on place one of a group of same score entities)</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 <h3 id="evaluator-python-package">Evaluator (Python package)</h3>
 
