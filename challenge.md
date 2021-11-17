@@ -10,12 +10,20 @@ permalink: /
 
 ## 🕑 Timeline
 
+<div markdown="block" style="margin-top:1rem;">
+
+ | 📢 Extended deadline to 10.12.2021📢 |
+
+</div>
+
 <div class="table-wrapper" markdown="block">
+ 
+
 
 | Task                      |     Deadline              |                                               |
 |---------------------------|---------------------------|-----------------------------------------------|
 | Team registration         |            -              |  [Link](https://forms.gle/nJZACsSN7RUQM7xM7)  |
-| Submission deadline       | 01.12.2021 - 23:59 GMT-0  |  [Link](https://forms.gle/ucNpmMKVVUfgtGzj6)  |
+| Submission deadline       | 10.12.2021 - 23:59 GMT-0  |  [Link](https://forms.gle/ucNpmMKVVUfgtGzj6)  |
 
 </div>
 
